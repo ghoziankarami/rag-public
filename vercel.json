@@ -15,8 +15,5 @@
       "src": "/(.*)",
       "dest": "/dist/$1"
     }
-  ],
-  "env": {
-    "VITE_RAG_API_KEY": "@rag-api-key"
-  }
+  ]
 }
