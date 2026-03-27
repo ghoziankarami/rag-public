@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react'
 import axios from 'axios'
 
+const isLocalhost = typeof window !== 'undefined' && ['localhost', '127.0.0.1'].includes(window.location.hostname)
+
 // API Configuration
-const API_BASE = 'https://orebit.id/api/rag' // Will update after Vercel deploy
-const API_KEY = import.meta.env.VITE_RAG_API_KEY || ''
+const API_BASE = isLocalhost ? 'http://127.0.0.1:3004/api/rag' : '/api/rag'
 
 function App() {
   const [searchQuery, setSearchQuery] = useState('')
@@ -21,9 +22,7 @@ function App() {
   // Fetch stats from API
   const fetchStats = async () => {
     try {
-      const response = await axios.get(`${API_BASE}/stats`, {
-        headers: { 'X-API-Key': API_KEY }
-      })
+      const response = await axios.get(`${API_BASE}/stats`)
       setStats(response.data)
     } catch (error) {
       console.error('Failed to fetch stats:', error)
@@ -40,8 +39,6 @@ function App() {
       const response = await axios.post(`${API_BASE}/search`, {
         query: searchQuery,
         top_k: 10
-      }, {
-        headers: { 'X-API-Key': API_KEY }
       })
       setSearchResults(response.data.results || [])
       setActiveTab('search')
@@ -57,8 +54,7 @@ function App() {
     setLoading(true)
     try {
       const response = await axios.get(`${API_BASE}/browse`, {
-        params: { page, limit: 20 },
-        headers: { 'X-API-Key': API_KEY }
+        params: { page, limit: 20 }
       })
       setPapers(response.data.papers || [])
       setActiveTab('browse')

@@ -1,6 +1,7 @@
 # RAG Public Dashboard
 
-Public RAG search and browse dashboard for academic papers deployed on Vercel.
+Vercel-backed public RAG search and browse dashboard for academic papers.
+This is the live UI source for `rag.orebit.id` after cutover; the legacy Streamlit showcase remains only as rollback reference.
 
 ## Deploy to Vercel
 
@@ -11,10 +12,11 @@ Public RAG search and browse dashboard for academic papers deployed on Vercel.
    npm install -g vercel
    ```
 
-2. Login to Vercel:
+2. Check the canonical secrets file first:
    ```bash
-   vercel login
+   test -f ~/.openclaw/secrets.env && grep '^VERCEL_TOKEN=' ~/.openclaw/secrets.env
    ```
+   If the token is missing, then either add it to `~/.openclaw/secrets.env` or login once and sync it there.
 
 ### Deployment Steps
 
@@ -34,8 +36,9 @@ Public RAG search and browse dashboard for academic papers deployed on Vercel.
    - Link to existing project if exists
 
 4. Set environment variables:
-   - `VITE_RAG_API_KEY`: Your API key for RAG API wrapper
-   - Add via Vercel dashboard or CLI: `vercel env add VITE_RAG_API_KEY`
+   - `RAG_API_BASE`: Public base URL for the RAG API wrapper (for example, `https://api.orebit.id/api/rag`)
+   - `RAG_API_KEY`: API key used by the Vercel serverless proxy to authenticate with the wrapper
+   - Add via Vercel dashboard or CLI: `vercel env add RAG_API_BASE` / `vercel env add RAG_API_KEY`
 
 5. Configure custom domain (if needed):
    - Add `rag.orebit.id` in Vercel dashboard
@@ -43,9 +46,11 @@ Public RAG search and browse dashboard for academic papers deployed on Vercel.
 
 ### API Connection
 
-The frontend connects to RAG API wrapper running on VPS:
+The frontend calls the same-origin Vercel proxy at `/api/rag`. The proxy forwards to the public wrapper using server-side env values.
 
-- **API Base URL**: `https://orebit.id/api/rag`
+- **API Base URL (client)**: `/api/rag` in production, `http://127.0.0.1:3004/api/rag` in local development
+- **Public wrapper host**: `api.orebit.id`
+- **Proxy env (server-side only)**: `RAG_API_BASE`, `RAG_API_KEY`
 - **Endpoints**:
   - `GET /api/rag/stats` - Collection statistics
   - `POST /api/rag/search` - Vector similarity search
@@ -56,7 +61,8 @@ The frontend connects to RAG API wrapper running on VPS:
 
 Required:
 
-- `VITE_RAG_API_KEY` - API key for RAG API wrapper authentication
+- `RAG_API_BASE` - public wrapper base URL used by the Vercel proxy
+- `RAG_API_KEY` - API key for the wrapper, used only server-side in the Vercel proxy
 
 ### Local Development
 
@@ -76,8 +82,8 @@ npm run preview
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                    Vercel CDN                              │
-│                    (rag.orebit.id)                         │
+│             Vercel CDN (live UI)                             │
+│        (rag.orebit.id served via Caddy proxy)                │
 └─────────────────────────────────────────────────────────────────┘
                               │
                               │ HTTPS + API Key
@@ -102,6 +108,8 @@ npm run preview
 ## Notes
 
 - Frontend is static (HTML + JS + CSS)
-- API wrapper handles authentication and rate limiting
+- The Vercel serverless proxy handles authentication; the browser never sees the wrapper API key
+- API wrapper handles rate limiting and data access
 - Vector DB stays on VPS for security
 - Public access is read-only via API wrapper
+- The current live `rag.orebit.id` service is the Vercel-backed UI; the Streamlit showcase is rollback-only
