@@ -5,11 +5,11 @@ const isLocalhost = typeof window !== 'undefined' && ['localhost', '127.0.0.1'].
 const API_BASE = isLocalhost ? 'http://127.0.0.1:3004/api/rag' : '/api/rag'
 
 const QUICK_QUERIES = [
+  'geostatistics uncertainty',
+  'gravity anomaly interpretation',
   'mineral exploration machine learning',
-  'geology note cleanup workflow',
-  'agent orchestration and automation',
-  'open source mining system design',
-  'field data fusion for remote sensing',
+  'physics-informed geoscience',
+  'remote sensing data fusion',
 ]
 
 const FILTERS = ['All sources', 'Has DOI', 'No DOI', 'Recent (2024+)', 'Older papers']
@@ -26,6 +26,11 @@ function scoreLabel(score) {
   return 'Supporting match'
 }
 
+function paperLabel(item) {
+  if (!item) return ''
+  return item.citation || item.display_title || item.title || item.source || ''
+}
+
 function App() {
   const [searchQuery, setSearchQuery] = useState('')
   const [searchResults, setSearchResults] = useState([])
@@ -36,9 +41,12 @@ function App() {
   const [activeTab, setActiveTab] = useState('search')
   const [recentQueries, setRecentQueries] = useState([])
   const [browsePage, setBrowsePage] = useState(1)
-  const [health, setHealth] = useState(null)
   const [sourceFilter, setSourceFilter] = useState('All sources')
   const [browseYear, setBrowseYear] = useState('All years')
+  const [answerQuery, setAnswerQuery] = useState('')
+  const [answerResult, setAnswerResult] = useState(null)
+  const [answerLoading, setAnswerLoading] = useState(false)
+  const [answerError, setAnswerError] = useState('')
 
   useEffect(() => {
     fetchDashboardState()
@@ -49,17 +57,8 @@ function App() {
 
   async function fetchDashboardState() {
     try {
-      const [statsRes, healthRes] = await Promise.allSettled([
-        axios.get(`${API_BASE}/stats`),
-        axios.get(`${API_BASE}/health`),
-      ])
-
-      if (statsRes.status === 'fulfilled') {
-        setStats(statsRes.value.data)
-      }
-      if (healthRes.status === 'fulfilled') {
-        setHealth(healthRes.value.data)
-      }
+      const statsRes = await axios.get(`${API_BASE}/stats`)
+      setStats(statsRes.data)
     } catch (error) {
       console.error('Failed to fetch dashboard state:', error)
     }
@@ -84,6 +83,28 @@ function App() {
       console.error('Search failed:', error)
     } finally {
       setLoading(false)
+    }
+  }
+
+  async function handleAsk(e) {
+    e.preventDefault()
+    if (!answerQuery.trim()) return
+
+    setAnswerLoading(true)
+    setAnswerError('')
+    try {
+      const response = await axios.post(`${API_BASE}/answer`, {
+        query: answerQuery,
+        top_k: 5,
+      })
+      setAnswerResult(response.data)
+      setRecentQueries((current) => [answerQuery.trim(), ...current.filter((item) => item !== answerQuery.trim())].slice(0, 6))
+      setActiveTab('search')
+    } catch (error) {
+      console.error('Ask failed:', error)
+      setAnswerError(error?.response?.data?.message || error?.message || 'LLM answer failed')
+    } finally {
+      setAnswerLoading(false)
     }
   }
 
@@ -134,24 +155,24 @@ function App() {
 
   const coreMetrics = [
     {
-      label: 'Indexed chunks',
+      label: 'Papers indexed',
+      value: formatNumber(stats?.indexed_papers ?? stats?.paper_count ?? 0),
+      note: 'unique paper records in the public corpus',
+    },
+    {
+      label: 'Summary notes',
+      value: formatNumber(stats?.summary_count ?? 0),
+      note: 'curated summaries used for browse + answer',
+    },
+    {
+      label: 'Chunks',
       value: formatNumber(stats?.collection_count ?? stats?.indexed_chunks ?? 0),
-      note: 'vector corpus available for retrieval',
-    },
-    {
-      label: 'Active papers',
-      value: formatNumber(stats?.paper_count ?? stats?.active_papers ?? 0),
-      note: 'papers surfaced for browse + search',
-    },
-    {
-      label: 'Live health',
-      value: health?.status || 'ok',
-      note: health?.timestamp ? `checked ${new Date(health.timestamp).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}` : 'wrapper status',
+      note: 'full-text chunks available for retrieval',
     },
     {
       label: 'Recent queries',
       value: recentQueries.length.toString().padStart(2, '0'),
-      note: 'searches retained in the session',
+      note: 'saved in this session',
     },
   ]
 
@@ -161,20 +182,17 @@ function App() {
         <div className="rag-brand">
           <div className="rag-brand-mark">R</div>
           <div>
-            <p className="rag-kicker">Orebit RAG Workspace</p>
+            <p className="rag-kicker">Public paper corpus</p>
             <h1>RAG.orebit.id</h1>
           </div>
         </div>
 
         <div className="rag-topbar-actions">
-          <span className={`rag-pill ${health?.status === 'ok' ? 'is-good' : 'is-warn'}`}>
-            {health?.status === 'ok' ? 'Live wrapper healthy' : 'Health checking'}
-          </span>
           <button className="rag-button secondary" onClick={fetchDashboardState} type="button">
             Refresh stats
           </button>
           <button className="rag-button primary" onClick={() => setActiveTab('search')} type="button">
-            Search now
+            Start here
           </button>
         </div>
       </header>
@@ -182,11 +200,10 @@ function App() {
       <main className="rag-main">
         <section className="rag-hero card-surface">
           <div className="rag-hero-copy">
-            <p className="rag-kicker">Better than the old streamlit flow</p>
-            <h2>Search, browse, and inspect evidence in one fast React dashboard.</h2>
+            <p className="rag-kicker">Public paper library</p>
+            <h2>Search papers, browse the index, or ask a question.</h2>
             <p>
-              Keep the same core RAG capabilities — search and browse — but layer them into a denser UI with live stats,
-              recent queries, and evidence-focused cards that are actually pleasant to use.
+              Start with a topic, author, method, or domain keyword. This public demo is built for exploration, not internal workspace ops.
             </p>
             <div className="rag-hero-actions">
               {QUICK_QUERIES.map((query) => (
@@ -208,6 +225,67 @@ function App() {
           </div>
         </section>
 
+        <section className="rag-ask card-surface">
+          <div className="section-head">
+            <div>
+              <p className="rag-kicker">Ask a question</p>
+              <h3>Answers come from the indexed paper text</h3>
+            </div>
+            <div className="section-meta">Public papers only</div>
+          </div>
+
+          <form className="rag-askbar" onSubmit={handleAsk}>
+            <div className="rag-search-input-wrap">
+              <span>✦</span>
+              <input
+                value={answerQuery}
+                onChange={(e) => setAnswerQuery(e.target.value)}
+                placeholder="Ask a paper question, e.g. 'What does Caers 2025 focus on?'"
+                aria-label="Ask the paper corpus"
+              />
+            </div>
+            <button className="rag-button primary" type="submit" disabled={answerLoading}>
+              {answerLoading ? 'Thinking…' : 'Ask LLM'}
+            </button>
+            <button
+              className="rag-button secondary"
+              type="button"
+              onClick={() => setAnswerQuery(searchQuery)}
+              disabled={answerLoading}
+            >
+              Copy search query
+            </button>
+          </form>
+
+          {answerError && <div className="rag-inline-error">{answerError}</div>}
+
+          {answerResult?.answer && (
+            <div className="rag-answer card-surface subtle">
+              <div className="rag-answer-copy">
+                <strong>Answer</strong>
+                <p>{answerResult.answer}</p>
+              </div>
+              {!!answerResult.sources?.length && (
+                <div className="rag-answer-sources">
+                  <span className="rag-answer-label">Sources</span>
+                  <div className="history-list">
+                    {answerResult.sources.map((source, index) => (
+                      <button
+                        key={`${source.id || source.title || source.source || index}`}
+                        type="button"
+                        className="history-chip"
+                        onClick={() => setSelectedItem(source)}
+                      >
+                        {paperLabel(source) || `Source ${index + 1}`}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </section>
+
         <section className="rag-search card-surface">
           <form className="rag-searchbar" onSubmit={handleSearch}>
             <div className="rag-search-input-wrap">
@@ -215,7 +293,7 @@ function App() {
               <input
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Ask the corpus something specific: thesis, project note, paper, or workflow..."
+                placeholder="Ask about a paper, topic, author, or method..."
                 aria-label="Search the RAG corpus"
               />
             </div>
@@ -262,15 +340,15 @@ function App() {
                   {searchResults.length > 0 ? (
                     searchResults.map((result, index) => (
                       <button
-                        key={`${result.title}-${index}`}
+                        key={`${result.id || result.title}-${index}`}
                         type="button"
-                        className={`rag-result card-surface ${selectedMeta?.title === result.title ? 'selected' : ''}`}
+                        className={`rag-result card-surface ${selectedMeta?.id === result.id ? 'selected' : ''}`}
                         onClick={() => setSelectedItem(result)}
                       >
                         <div className="rag-result-head">
                           <div>
                             <span className="rag-result-rank">#{index + 1}</span>
-                            <h4>{result.title}</h4>
+                            <h4>{paperLabel(result)}</h4>
                           </div>
                           <div className="rag-score">
                             {typeof result.score === 'number' ? result.score.toFixed(2) : '—'}
@@ -335,16 +413,16 @@ function App() {
                   {filteredPapers.length > 0 ? (
                     filteredPapers.map((paper, index) => (
                       <button
-                        key={`${paper.title}-${index}`}
+                        key={`${paper.id || paper.title}-${index}`}
                         type="button"
-                        className={`rag-paper card-surface ${selectedMeta?.title === paper.title ? 'selected' : ''}`}
+                        className={`rag-paper card-surface ${selectedMeta?.id === paper.id ? 'selected' : ''}`}
                         onClick={() => setSelectedItem(paper)}
                       >
                         <div className="rag-paper-top">
                           <span>{paper.year || '—'}</span>
                           {paper.doi ? <span>DOI</span> : <span>Paper</span>}
                         </div>
-                        <h4>{paper.title}</h4>
+                        <h4>{paperLabel(paper)}</h4>
                         <p>{paper.authors || paper.venue || 'No metadata returned'}</p>
                       </button>
                     ))
@@ -362,32 +440,32 @@ function App() {
               <>
                 <div className="section-head">
                   <div>
-                    <p className="rag-kicker">Operational insights</p>
-                    <h3>What the corpus is telling you</h3>
+                    <p className="rag-kicker">Corpus snapshot</p>
+                    <h3>Current paper library picture</h3>
                   </div>
-                  <div className="section-meta">Live summary</div>
+                  <div className="section-meta">Quick read</div>
                 </div>
 
                 <div className="rag-insight-grid">
                   <article className="card-surface subtle insight-card">
-                    <span>Search quality</span>
+                    <span>Top match</span>
                     <strong>{searchResults.length ? `${Math.min(100, Math.round((searchResults[0]?.score || 0) * 100))}%` : 'Ready'}</strong>
-                    <p>Top result confidence is visible immediately so you can judge whether the answer is worth drilling into.</p>
+                    <p>See the strongest result first so you know whether to open it.</p>
                   </article>
                   <article className="card-surface subtle insight-card">
-                    <span>Corpus coverage</span>
-                    <strong>{formatNumber(stats?.paper_count || 0)} papers</strong>
-                    <p>Browse mode exposes the index surface and keeps the paper list close to the search flow.</p>
+                    <span>Indexed papers</span>
+                    <strong>{formatNumber(stats?.paper_count || 0)}</strong>
+                    <p>How many papers are available to search and browse.</p>
                   </article>
                   <article className="card-surface subtle insight-card">
-                    <span>Retrieval surface</span>
-                    <strong>{formatNumber(stats?.collection_count || 0)} chunks</strong>
-                    <p>The vector store count is made visible so users can judge whether the corpus is healthy or thin.</p>
+                    <span>Full-text chunks</span>
+                    <strong>{formatNumber(stats?.collection_count || 0)}</strong>
+                    <p>How much text the retrieval layer can search through.</p>
                   </article>
                   <article className="card-surface subtle insight-card">
-                    <span>Session memory</span>
-                    <strong>{recentQueries.length} recent</strong>
-                    <p>Recent queries help the user resume a search thread without retyping everything from scratch.</p>
+                    <span>Recent queries</span>
+                    <strong>{recentQueries.length}</strong>
+                    <p>Your last searches stay visible for quick reuse.</p>
                   </article>
                 </div>
 
@@ -395,7 +473,7 @@ function App() {
                   <div className="section-head tight">
                     <div>
                       <p className="rag-kicker">Recent queries</p>
-                      <h3>Jump back into the last few searches</h3>
+                      <h3>Tap to repeat a search</h3>
                     </div>
                   </div>
                   <div className="history-list">
@@ -425,7 +503,8 @@ function App() {
               </div>
               {selectedMeta ? (
                 <div className="selected-panel">
-                  <h4>{selectedMeta.title}</h4>
+                  <h4>{paperLabel(selectedMeta)}</h4>
+                  {selectedMeta.citation && <p className="selected-citation">{selectedMeta.citation}</p>}
                   {selectedMeta.snippet && <p>{selectedMeta.snippet}</p>}
                   {selectedLink && (
                     <div className="selected-link-row">
@@ -451,6 +530,12 @@ function App() {
                       <div>
                         <span>Authors</span>
                         <strong>{selectedMeta.authors}</strong>
+                      </div>
+                    )}
+                    {selectedMeta.display_title && !selectedMeta.citation && (
+                      <div>
+                        <span>Title</span>
+                        <strong>{selectedMeta.display_title}</strong>
                       </div>
                     )}
                     {selectedMeta.doi && (
@@ -489,26 +574,26 @@ function App() {
             <div className="sidebar-stack card-surface subtle">
               <div className="section-head tight">
                 <div>
-                  <p className="rag-kicker">Live health</p>
-                  <h3>Wrapper status & activity</h3>
+                  <p className="rag-kicker">Start here</p>
+                  <h3>Three quick steps</h3>
                 </div>
               </div>
               <div className="health-list">
                 <div>
-                  <span>Status</span>
-                  <strong>{health?.status || 'unknown'}</strong>
+                  <span>1</span>
+                  <strong>Search a topic</strong>
                 </div>
                 <div>
-                  <span>Timestamp</span>
-                  <strong>{health?.timestamp ? new Date(health.timestamp).toLocaleString() : '—'}</strong>
+                  <span>2</span>
+                  <strong>Browse the library</strong>
                 </div>
                 <div>
-                  <span>Recent paper browse</span>
-                  <strong>{papers.length || 0} loaded</strong>
+                  <span>3</span>
+                  <strong>Open a source or ask</strong>
                 </div>
                 <div>
-                  <span>Top filters</span>
-                  <strong>{sourceFilter}</strong>
+                  <span>Tip</span>
+                  <strong>Try a topic or author first</strong>
                 </div>
               </div>
             </div>
@@ -516,12 +601,12 @@ function App() {
             <div className="sidebar-stack card-surface subtle">
               <div className="section-head tight">
                 <div>
-                  <p className="rag-kicker">Browse hint</p>
-                  <h3>Keep the corpus easy to navigate</h3>
+                  <p className="rag-kicker">Navigation</p>
+                  <h3>Fast path through the page</h3>
                 </div>
               </div>
               <p className="sidebar-copy">
-                The React dashboard keeps the same core abilities as the older Streamlit version, but makes the search ↔ browse ↔ inspect loop much more obvious.
+                Use the quick query buttons at the top, then tap a result to inspect the paper source. The page is built to work on mobile without extra hunting.
               </p>
             </div>
           </aside>

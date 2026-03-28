@@ -692,3 +692,66 @@ button {
     grid-template-columns: 1fr;
   }
 }
+
+.rag-ask {
+  margin-top: 18px;
+  padding: 22px 24px;
+  display: grid;
+  gap: 18px;
+}
+
+.rag-askbar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 12px;
+}
+
+.rag-inline-error {
+  padding: 12px 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(251, 113, 133, 0.25);
+  background: rgba(251, 113, 133, 0.10);
+  color: #fecdd3;
+  font-size: 14px;
+}
+
+.rag-answer {
+  display: grid;
+  gap: 14px;
+  padding: 18px;
+}
+
+.rag-answer-copy {
+  display: grid;
+  gap: 8px;
+}
+
+.rag-answer-copy strong,
+.rag-answer-label {
+  color: var(--text-primary);
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.rag-answer-copy p {
+  margin: 0;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  white-space: pre-wrap;
+}
+
+.rag-answer-sources {
+  display: grid;
+  gap: 10px;
+}
+
+.rag-answer-sources .history-list {
+  margin-top: 0;
+}
+
+@media (max-width: 900px) {
+  .rag-askbar {
+    grid-template-columns: 1fr;
+  }
+}
