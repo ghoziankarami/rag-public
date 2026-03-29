@@ -155,14 +155,14 @@ function App() {
 
   const coreMetrics = [
     {
-      label: 'Papers indexed',
-      value: formatNumber(stats?.indexed_papers ?? stats?.paper_count ?? 0),
-      note: 'unique paper records in the public corpus',
+      label: 'Full-text papers',
+      value: formatNumber(stats?.fulltext_papers ?? stats?.paper_count ?? 0),
+      note: 'papers with real full-text chunks in the public corpus',
     },
     {
-      label: 'Summary notes',
-      value: formatNumber(stats?.summary_count ?? 0),
-      note: 'curated summaries used for browse + answer',
+      label: 'Metadata-only records',
+      value: formatNumber(stats?.metadata_only_records ?? 0),
+      note: 'browseable records that do not yet have full-text chunks',
     },
     {
       label: 'Chunks',
@@ -170,9 +170,9 @@ function App() {
       note: 'full-text chunks available for retrieval',
     },
     {
-      label: 'Recent queries',
-      value: recentQueries.length.toString().padStart(2, '0'),
-      note: 'saved in this session',
+      label: 'Public records',
+      value: formatNumber(stats?.indexed_papers ?? 0),
+      note: 'full-text + metadata-only records combined',
     },
   ]
 
