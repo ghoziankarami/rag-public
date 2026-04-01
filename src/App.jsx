@@ -186,80 +186,123 @@ function App() {
             <h1>RAG.orebit.id</h1>
           </div>
         </div>
-
-        <div className="rag-topbar-actions">
-          <button className="rag-button secondary" onClick={fetchDashboardState} type="button">
-            Refresh stats
-          </button>
-          <button className="rag-button primary" onClick={() => setActiveTab('search')} type="button">
-            Start here
-          </button>
-        </div>
       </header>
 
       <main className="rag-main">
         <section className="rag-hero card-surface">
           <div className="rag-hero-copy">
-            <p className="rag-kicker">Public paper library</p>
-            <h2>Search papers, browse the index, or ask a question.</h2>
-            <p>
-              Start with a topic, author, method, or domain keyword. This public demo is built for exploration, not internal workspace ops.
-            </p>
+            <div>
+              <p className="rag-kicker">Public paper library</p>
+              <h2>Mulai dari pertanyaan, lalu telusuri evidence yang paling relevan.</h2>
+              <p>
+                RAG sekarang diselaraskan dengan Mission: masuk dari hero yang jelas, lihat snapshot corpus,
+                lalu lanjut ke search, browse, atau answer sesuai kebutuhan.
+              </p>
+            </div>
             <div className="rag-hero-actions">
-              {QUICK_QUERIES.map((query) => (
-                <button key={query} type="button" className="rag-chip" onClick={() => setSearchQuery(query)}>
-                  {query}
-                </button>
-              ))}
+              <button className="rag-button primary" type="button" onClick={() => setActiveTab('search')}>
+                Start Searching
+              </button>
+              <button className="rag-button secondary" type="button" onClick={() => { setActiveTab('browse'); if (!papers.length) loadBrowse(browsePage) }}>
+                Browse Library
+              </button>
             </div>
           </div>
 
-          <div className="rag-hero-panel">
+          <div className="rag-hero-highlight">
+            <span className="rag-hero-highlight-label">Corpus snapshot</span>
+            <strong>{formatNumber(stats?.indexed_papers ?? stats?.paper_count ?? 0)} public records available</strong>
+            <p>
+              {formatNumber(stats?.collection_count ?? stats?.indexed_chunks ?? 0)} chunks siap dipakai untuk retrieval dan jawaban berbasis evidence.
+            </p>
+          </div>
+        </section>
+
+        <section className="rag-public-assurance card-surface subtle">
+          <div>
+            <p className="rag-kicker">Public-only surface</p>
+            <h3>Tidak ada monitoring internal di dashboard ini.</h3>
+            <p>
+              RAG hanya menampilkan metrik corpus yang aman untuk publik: jumlah paper, jumlah chunk, volume pencarian publik,
+              dan pengalaman penelusuran. Status backup, cron, security, dan biaya tetap tinggal di dashboard internal.
+            </p>
+          </div>
+          <div className="rag-public-metrics">
             {coreMetrics.map((metric) => (
-              <article key={metric.label} className="rag-metric card-surface subtle">
-                <p>{metric.label}</p>
+              <article key={metric.label} className="rag-public-metric">
+                <span>{metric.label}</span>
                 <strong>{metric.value}</strong>
-                <span>{metric.note}</span>
+                <p>{metric.note}</p>
               </article>
             ))}
           </div>
         </section>
 
-        <section className="rag-ask card-surface">
-          <div className="section-head">
-            <div>
-              <p className="rag-kicker">Ask a question</p>
-              <h3>Answers come from the indexed paper text</h3>
-            </div>
-            <div className="section-meta">Public papers only</div>
-          </div>
-
-          <form className="rag-askbar" onSubmit={handleAsk}>
-            <div className="rag-search-input-wrap">
-              <span>✦</span>
-              <input
-                value={answerQuery}
-                onChange={(e) => setAnswerQuery(e.target.value)}
-                placeholder="Ask a paper question, e.g. 'What does Caers 2025 focus on?'"
-                aria-label="Ask the paper corpus"
-              />
-            </div>
-            <button className="rag-button primary" type="submit" disabled={answerLoading}>
-              {answerLoading ? 'Thinking…' : 'Ask LLM'}
+        <section className="rag-unified card-surface">
+          <div className="rag-tabbar inline">
+            <button
+              type="button"
+              className={`rag-tab ${activeTab === 'search' || activeTab === 'ask' ? 'active' : ''}`}
+              onClick={() => setActiveTab('search')}
+            >
+              Search
             </button>
             <button
-              className="rag-button secondary"
               type="button"
-              onClick={() => setAnswerQuery(searchQuery)}
-              disabled={answerLoading}
+              className={`rag-tab ${activeTab === 'ask' ? 'active' : ''}`}
+              onClick={() => setActiveTab('ask')}
             >
-              Copy search query
+              Ask LLM
             </button>
-          </form>
+            <button
+              type="button"
+              className={`rag-tab ${activeTab === 'browse' ? 'active' : ''}`}
+              onClick={() => {
+                setActiveTab('browse')
+                if (!papers.length) loadBrowse(browsePage)
+              }}
+            >
+              Browse
+            </button>
+            <button
+              type="button"
+              className={`rag-tab ${activeTab === 'insights' ? 'active' : ''}`}
+              onClick={() => setActiveTab('insights')}
+            >
+              Insights
+            </button>
+          </div>
 
-          {answerError && <div className="rag-inline-error">{answerError}</div>}
+          {(activeTab === 'search' || activeTab === 'ask') && (
+            <form className="rag-mainbar" onSubmit={activeTab === 'ask' ? handleAsk : handleSearch}>
+              <div className="rag-search-input-wrap large">
+                <span>{activeTab === 'ask' ? '✦' : '⌕'}</span>
+                <input
+                  value={activeTab === 'ask' ? answerQuery : searchQuery}
+                  onChange={(e) => activeTab === 'ask' ? setAnswerQuery(e.target.value) : setSearchQuery(e.target.value)}
+                  placeholder={activeTab === 'ask' ? "Ask a paper question, e.g. 'What does Caers 2025 focus on?'" : "Ask about a paper, topic, author, or method..."}
+                  aria-label={activeTab === 'ask' ? "Ask the paper corpus" : "Search the RAG corpus"}
+                />
+              </div>
+              <button className="rag-button primary large" type="submit" disabled={activeTab === 'ask' ? answerLoading : loading}>
+                {activeTab === 'ask' ? (answerLoading ? 'Thinking…' : 'Ask') : (loading && activeTab === 'search' ? 'Searching…' : 'Search')}
+              </button>
+              {activeTab === 'ask' && (
+                <button
+                  className="rag-button secondary"
+                  type="button"
+                  onClick={() => setAnswerQuery(searchQuery)}
+                  disabled={answerLoading}
+                >
+                  Use search query
+                </button>
+              )}
+            </form>
+          )}
 
-          {answerResult?.answer && (
+          {activeTab === 'ask' && answerError && <div className="rag-inline-error">{answerError}</div>}
+
+          {activeTab === 'ask' && answerResult?.answer && (
             <div className="rag-answer card-surface subtle">
               <div className="rag-answer-copy">
                 <strong>Answer</strong>
@@ -286,49 +329,13 @@ function App() {
           )}
         </section>
 
-        <section className="rag-search card-surface">
-          <form className="rag-searchbar" onSubmit={handleSearch}>
-            <div className="rag-search-input-wrap">
-              <span>⌕</span>
-              <input
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Ask about a paper, topic, author, or method..."
-                aria-label="Search the RAG corpus"
-              />
-            </div>
-            <button className="rag-button primary" type="submit" disabled={loading}>
-              {loading && activeTab === 'search' ? 'Searching…' : 'Search corpus'}
-            </button>
-            <button className="rag-button secondary" type="button" onClick={() => loadBrowse(1)} disabled={loading}>
-              Browse papers
-            </button>
-          </form>
-
-          <div className="rag-tabbar">
-            {['search', 'browse', 'insights'].map((tab) => (
-              <button
-                key={tab}
-                type="button"
-                className={`rag-tab ${activeTab === tab ? 'active' : ''}`}
-                onClick={() => {
-                  setActiveTab(tab)
-                  if (tab === 'browse' && !papers.length) loadBrowse(browsePage)
-                }}
-              >
-                {tab === 'search' ? 'Search results' : tab === 'browse' ? 'Browse library' : 'Insights'}
-              </button>
-            ))}
-          </div>
-        </section>
-
         <section className="rag-content">
           <div className="rag-primary-column">
             {activeTab === 'search' && (
               <>
                 <div className="section-head">
                   <div>
-                    <p className="rag-kicker">Search response</p>
+                    <p className="rag-kicker">Search results</p>
                     <h3>Evidence cards ranked by relevance</h3>
                   </div>
                   <div className="section-meta">
@@ -346,16 +353,30 @@ function App() {
                         onClick={() => setSelectedItem(result)}
                       >
                         <div className="rag-result-head">
-                          <div>
+                          <div className="rag-result-title-area">
                             <span className="rag-result-rank">#{index + 1}</span>
                             <h4>{paperLabel(result)}</h4>
                           </div>
-                          <div className="rag-score">
-                            {typeof result.score === 'number' ? result.score.toFixed(2) : '—'}
+                          <div className="rag-score-badge">
+                            <strong>{typeof result.score === 'number' ? result.score.toFixed(2) : '—'}</strong>
                             <small>{typeof result.score === 'number' ? scoreLabel(result.score) : 'Match score'}</small>
                           </div>
                         </div>
-                        <p>{result.snippet}</p>
+                        {result.doi && (
+                          <div className="rag-result-doi">
+                            <span>DOI: </span>
+                            <a href={`https://doi.org/${result.doi}`} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()}>
+                              {result.doi}
+                            </a>
+                          </div>
+                        )}
+                        <p className="rag-result-snippet">{result.snippet}</p>
+                        {result.year && (
+                          <div className="rag-result-meta">
+                            <span>{result.year}</span>
+                            {result.authors && <span>{result.authors}</span>}
+                          </div>
+                        )}
                       </button>
                     ))
                   ) : (
@@ -419,11 +440,13 @@ function App() {
                         onClick={() => setSelectedItem(paper)}
                       >
                         <div className="rag-paper-top">
-                          <span>{paper.year || '—'}</span>
-                          {paper.doi ? <span>DOI</span> : <span>Paper</span>}
+                          <span className="rag-paper-year">{paper.year || '—'}</span>
+                          <span className={`rag-paper-type ${paper.doi ? 'has-doi' : ''}`}>
+                            {paper.doi ? 'DOI' : 'Metadata'}
+                          </span>
                         </div>
                         <h4>{paperLabel(paper)}</h4>
-                        <p>{paper.authors || paper.venue || 'No metadata returned'}</p>
+                        <p className="rag-paper-authors">{paper.authors || paper.venue || 'No metadata returned'}</p>
                       </button>
                     ))
                   ) : (
@@ -499,47 +522,46 @@ function App() {
                   <p className="rag-kicker">Selected item</p>
                   <h3>Inspect the evidence</h3>
                 </div>
-                <div className="section-meta">Details</div>
               </div>
               {selectedMeta ? (
                 <div className="selected-panel">
                   <h4>{paperLabel(selectedMeta)}</h4>
                   {selectedMeta.citation && <p className="selected-citation">{selectedMeta.citation}</p>}
-                  {selectedMeta.snippet && <p>{selectedMeta.snippet}</p>}
+                  {selectedMeta.snippet && <p className="selected-snippet">{selectedMeta.snippet}</p>}
                   {selectedLink && (
                     <div className="selected-link-row">
-                      <a href={selectedLink} target="_blank" rel="noreferrer" className="rag-link-button">
-                        Open source
+                      <a href={selectedLink} target="_blank" rel="noreferrer" className="rag-link-button primary">
+                        {selectedMeta.doi ? 'View on DOI.org' : 'Open source'}
                       </a>
                     </div>
                   )}
                   <div className="selected-meta">
                     {selectedMeta.score !== undefined && (
-                      <div>
-                        <span>Score</span>
+                      <div className="meta-item">
+                        <span>Match score</span>
                         <strong>{typeof selectedMeta.score === 'number' ? selectedMeta.score.toFixed(2) : '—'}</strong>
                       </div>
                     )}
                     {selectedMeta.year && (
-                      <div>
+                      <div className="meta-item">
                         <span>Year</span>
                         <strong>{selectedMeta.year}</strong>
                       </div>
                     )}
                     {selectedMeta.authors && (
-                      <div>
+                      <div className="meta-item">
                         <span>Authors</span>
                         <strong>{selectedMeta.authors}</strong>
                       </div>
                     )}
                     {selectedMeta.display_title && !selectedMeta.citation && (
-                      <div>
+                      <div className="meta-item">
                         <span>Title</span>
                         <strong>{selectedMeta.display_title}</strong>
                       </div>
                     )}
                     {selectedMeta.doi && (
-                      <div>
+                      <div className="meta-item doi-item">
                         <span>DOI</span>
                         <strong>{selectedMeta.doi}</strong>
                       </div>
@@ -549,65 +571,6 @@ function App() {
               ) : (
                 <div className="empty-inline">Pick a result or paper to inspect it here.</div>
               )}
-            </div>
-
-            <div className="sidebar-stack card-surface subtle">
-              <div className="section-head tight">
-                <div>
-                  <p className="rag-kicker">Quick actions</p>
-                  <h3>Shortcuts that help day-to-day use</h3>
-                </div>
-              </div>
-              <div className="quick-actions">
-                <button className="rag-button secondary full" type="button" onClick={() => setActiveTab('search')}>
-                  Open search mode
-                </button>
-                <button className="rag-button secondary full" type="button" onClick={() => setActiveTab('browse')}>
-                  Open browse mode
-                </button>
-                <button className="rag-button secondary full" type="button" onClick={() => setActiveTab('insights')}>
-                  Open insights
-                </button>
-              </div>
-            </div>
-
-            <div className="sidebar-stack card-surface subtle">
-              <div className="section-head tight">
-                <div>
-                  <p className="rag-kicker">Start here</p>
-                  <h3>Three quick steps</h3>
-                </div>
-              </div>
-              <div className="health-list">
-                <div>
-                  <span>1</span>
-                  <strong>Search a topic</strong>
-                </div>
-                <div>
-                  <span>2</span>
-                  <strong>Browse the library</strong>
-                </div>
-                <div>
-                  <span>3</span>
-                  <strong>Open a source or ask</strong>
-                </div>
-                <div>
-                  <span>Tip</span>
-                  <strong>Try a topic or author first</strong>
-                </div>
-              </div>
-            </div>
-
-            <div className="sidebar-stack card-surface subtle">
-              <div className="section-head tight">
-                <div>
-                  <p className="rag-kicker">Navigation</p>
-                  <h3>Fast path through the page</h3>
-                </div>
-              </div>
-              <p className="sidebar-copy">
-                Use the quick query buttons at the top, then tap a result to inspect the paper source. The page is built to work on mobile without extra hunting.
-              </p>
             </div>
           </aside>
         </section>
