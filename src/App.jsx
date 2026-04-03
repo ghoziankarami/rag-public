@@ -12,6 +12,24 @@ const SUGGESTIONS = [
   'Remote sensing for mineral exploration',
 ]
 
+const CONTEXT_CARDS = [
+  {
+    label: 'What is RAG?',
+    title: 'Retrieval-Augmented Generation keeps answers grounded',
+    body: 'Instead of answering from model memory alone, RAG first retrieves relevant papers and then composes an answer from those sources.',
+  },
+  {
+    label: 'Why use it here?',
+    title: 'Better for literature-heavy mining and geoscience work',
+    body: 'This helps you compare methods, inspect evidence, and reduce hallucinated claims when the answer should come from papers, not guesses.',
+  },
+  {
+    label: 'Best workflow',
+    title: 'Ask, inspect sources, then open the paper detail',
+    body: 'Use chat for synthesis, source cards for evidence, and the paper browser when you want to scan the collection directly.',
+  },
+]
+
 function scoreColor(score) {
   if (score >= 0.85) return 'var(--score-excellent)'
   if (score >= 0.7) return 'var(--score-strong)'
@@ -31,12 +49,21 @@ function formatNumber(v) {
   return Number(v).toLocaleString('en-US')
 }
 
+function normalizePaperDetail(record) {
+  if (!record) return null
+  return {
+    ...record,
+    snippet: record.snippet || record.definition_snippet || 'No summary available.',
+    title: record.title || record.display_title || record.citation || 'Untitled paper',
+  }
+}
+
 function App() {
   const [query, setQuery] = useState('')
   const [messages, setMessages] = useState([])
   const [loading, setLoading] = useState(false)
   const [stats, setStats] = useState(null)
-  const [showBrowse, setShowBrowse] = useState(false)
+  const [showBrowse, setShowBrowse] = useState(true)
   const [papers, setPapers] = useState([])
   const [browsePage, setBrowsePage] = useState(1)
   const [browseLoading, setBrowseLoading] = useState(false)
@@ -48,6 +75,12 @@ function App() {
   useEffect(() => {
     fetchStats()
   }, [])
+
+  useEffect(() => {
+    if (showBrowse && !papers.length) {
+      loadBrowse(1)
+    }
+  }, [showBrowse])
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -117,17 +150,22 @@ function App() {
     if (next && !papers.length) loadBrowse(1)
   }
 
+  function openPaperDetail(paper) {
+    setSourceDetail(normalizePaperDetail(paper))
+  }
+
   const paperCount = stats?.fulltext_papers ?? stats?.paper_count ?? 0
   const chunkCount = stats?.collection_count ?? stats?.indexed_chunks ?? 0
+  const summaryCount = stats?.summary_count ?? 0
 
   return (
     <div className="app">
-      {/* Header */}
       <header className="header">
         <div className="header-inner">
           <div className="brand">
             <div className="brand-mark">O</div>
-            <div>
+            <div className="brand-copy">
+              <span className="brand-kicker">Orebit Research</span>
               <h1 className="brand-name">Orebit RAG</h1>
               <p className="brand-sub">
                 {formatNumber(paperCount)} papers · {formatNumber(chunkCount)} chunks
@@ -141,14 +179,28 @@ function App() {
       </header>
 
       <main className="main">
-        {/* Chat area */}
-        <div className="chat-area">
-          {messages.length === 0 && !loading && (
-            <div className="welcome">
-              <h2>Ask anything about geological research</h2>
+        <section className="hero-shell">
+          <article className="hero-panel">
+            <div className="hero-copy">
+              <span className="eyebrow">Grounded research assistant</span>
+              <h2>Ask, retrieve, and inspect paper-backed answers.</h2>
               <p>
-                Search {formatNumber(paperCount)} peer-reviewed papers with AI-powered answers and source citations.
+                RAG stands for Retrieval-Augmented Generation. This app first retrieves the most relevant papers from the Orebit collection, then builds an answer from those sources so you can inspect the evidence instead of trusting a generic model response.
               </p>
+              <div className="hero-points">
+                <div className="hero-point">
+                  <span className="hero-point-bullet" />
+                  <span><strong>Use chat</strong> when you want a fast synthesis across many papers.</span>
+                </div>
+                <div className="hero-point">
+                  <span className="hero-point-bullet" />
+                  <span><strong>Use the source list</strong> when you need to verify which papers support the answer.</span>
+                </div>
+                <div className="hero-point">
+                  <span className="hero-point-bullet" />
+                  <span><strong>Use the library browser</strong> when you want to explore the corpus directly, not through a single question.</span>
+                </div>
+              </div>
               <div className="suggestions">
                 {SUGGESTIONS.map((s, i) => (
                   <button key={i} className="suggestion-chip" onClick={() => handleSuggestion(s)}>
@@ -156,89 +208,143 @@ function App() {
                   </button>
                 ))}
               </div>
-            </div>
-          )}
-
-          {messages.map((msg, i) => (
-            <div key={i} className={`message ${msg.role}`}>
-              <div className="message-label">{msg.role === 'user' ? 'You' : 'Orebit AI'}</div>
-              <div className="message-content">{msg.content}</div>
-              {msg.sources?.length > 0 && (
-                <div className="sources">
-                  <button
-                    className="sources-toggle"
-                    onClick={() => setSelectedSource(selectedSource === i ? null : i)}
-                  >
-                    📚 {msg.sources.length} source{msg.sources.length > 1 ? 's' : ''} {selectedSource === i ? '▾' : '▸'}
-                  </button>
-                  {selectedSource === i && (
-                    <div className="sources-list">
-                      {msg.sources.map((src, j) => (
-                        <button key={j} className="source-card source-card-button" onClick={() => setSourceDetail(src)}>
-                          <div className="source-head">
-                            <span className="source-title">
-                              {src.title || src.display_title || src.citation || `Source ${j + 1}`}
-                            </span>
-                            {typeof src.score === 'number' && (
-                              <span className="score-badge" style={{ background: scoreColor(src.score) }}>
-                                {(src.score * 100).toFixed(0)}% · {scoreLabel(src.score)}
-                              </span>
-                            )}
-                          </div>
-                          {(src.definition_snippet || src.snippet) && <p className="source-snippet">{src.definition_snippet || src.snippet}</p>}
-                          <div className="source-meta">
-                            {src.year && <span>{src.year}</span>}
-                            {src.authors && <span>{src.authors}</span>}
-                            {src.doi && (
-                              <a href={`https://doi.org/${src.doi}`} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()}>
-                                DOI ↗
-                              </a>
-                            )}
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          ))}
-
-          {loading && (
-            <div className="message assistant">
-              <div className="message-label">Orebit AI</div>
-              <div className="message-content loading-dots">
-                <span></span><span></span><span></span>
+              <div className="hero-caption">
+                Best for literature review, method comparison, and paper-backed technical answers.
               </div>
             </div>
-          )}
+          </article>
 
-          <div ref={chatEndRef} />
-        </div>
+          <aside className="hero-aside">
+            <div className="hero-stat-grid">
+              <div className="hero-stat">
+                <span className="hero-stat-label">Indexed papers</span>
+                <strong>{formatNumber(paperCount)}</strong>
+                <small>Full-text research records available for retrieval.</small>
+              </div>
+              <div className="hero-stat">
+                <span className="hero-stat-label">Search chunks</span>
+                <strong>{formatNumber(chunkCount)}</strong>
+                <small>Vectorized chunks used to find relevant evidence.</small>
+              </div>
+              <div className="hero-stat">
+                <span className="hero-stat-label">Summaries</span>
+                <strong>{formatNumber(summaryCount)}</strong>
+                <small>Records that already include machine-readable summaries.</small>
+              </div>
+              <div className="hero-stat">
+                <span className="hero-stat-label">Mode</span>
+                <strong>Read-only</strong>
+                <small>Public browsing and question answering without editing the corpus.</small>
+              </div>
+            </div>
+            <div className="hero-note">
+              <h3>Why not just use a normal chatbot?</h3>
+              <p>
+                For literature review, estimation methods, and technical comparison, grounded retrieval usually beats memory-only answers because you can trace claims back to actual papers.
+              </p>
+            </div>
+          </aside>
+        </section>
 
-        {/* Input bar — fixed at bottom of main */}
-        <div className="input-bar">
-          <form id="ask-form" className="input-form" onSubmit={handleAsk}>
-            <input
-              ref={inputRef}
-              type="text"
-              value={query}
-              onChange={e => setQuery(e.target.value)}
-              placeholder="Ask about geostatistics, mining, geology..."
-              disabled={loading}
-              autoFocus
-            />
-            <button type="submit" disabled={loading || !query.trim()} className="send-btn">
-              {loading ? '...' : '→'}
-            </button>
-          </form>
-        </div>
+        <section className="context-grid">
+          {CONTEXT_CARDS.map((card) => (
+            <article key={card.label} className="context-card">
+              <span className="context-label">{card.label}</span>
+              <h3>{card.title}</h3>
+              <p>{card.body}</p>
+            </article>
+          ))}
+        </section>
 
-        {/* Browse toggle */}
-        <div className="browse-section">
-          <button className="browse-toggle" onClick={toggleBrowse}>
-            {showBrowse ? '▾ Hide Library' : '📚 Browse Paper Library'}
-          </button>
+        <section className="chat-shell">
+          <div className="section-head">
+            <div>
+              <h3>Research chat</h3>
+              <p>Ask a question, then inspect the supporting evidence below each answer.</p>
+            </div>
+            <span className="section-pill">Cited answers</span>
+          </div>
+
+          <div className="chat-area">
+            {messages.length === 0 && !loading && (
+              <div className="welcome">
+                <h2>Start with a research question</h2>
+                <p>
+                  Ask about geostatistics, remote sensing, ore estimation, mining systems, or any topic covered by the indexed paper collection.
+                </p>
+              </div>
+            )}
+
+            {messages.map((msg, i) => (
+              <div key={i} className={`message ${msg.role}`}>
+                <div className="message-label">{msg.role === 'user' ? 'You' : 'Orebit AI'}</div>
+                <div className="message-content">{msg.content}</div>
+                {msg.sources?.length > 0 && (
+                  <div className="sources">
+                    <button
+                      className="sources-toggle"
+                      onClick={() => setSelectedSource(selectedSource === i ? null : i)}
+                    >
+                      {msg.sources.length} supporting source{msg.sources.length > 1 ? 's' : ''} {selectedSource === i ? '▾' : '▸'}
+                    </button>
+                    {selectedSource === i && (
+                      <div className="sources-list">
+                        {msg.sources.map((src, j) => (
+                          <button key={j} className="source-card source-card-button" onClick={() => setSourceDetail(normalizePaperDetail(src))}>
+                            <div className="source-head">
+                              <span className="source-title">
+                                {src.title || src.display_title || src.citation || `Source ${j + 1}`}
+                              </span>
+                              {typeof src.score === 'number' && (
+                                <span className="score-badge" style={{ background: scoreColor(src.score) }}>
+                                  {(src.score * 100).toFixed(0)}% · {scoreLabel(src.score)}
+                                </span>
+                              )}
+                            </div>
+                            {(src.definition_snippet || src.snippet) && <p className="source-snippet">{src.definition_snippet || src.snippet}</p>}
+                            <div className="source-meta">
+                              {src.year && <span>{src.year}</span>}
+                              {src.authors && <span>{src.authors}</span>}
+                              {src.doi && (
+                                <a href={`https://doi.org/${src.doi}`} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()}>
+                                  DOI ↗
+                                </a>
+                              )}
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            ))}
+
+            {loading && (
+              <div className="message assistant">
+                <div className="message-label">Orebit AI</div>
+                <div className="message-content loading-dots">
+                  <span></span><span></span><span></span>
+                </div>
+              </div>
+            )}
+
+            <div ref={chatEndRef} />
+          </div>
+        </section>
+
+        <section className="library-shell">
+          <div className="library-head">
+            <div>
+              <h3>Paper library</h3>
+              <p>Browse the corpus directly in a detailed list view. Open a row to inspect the summary and metadata.</p>
+            </div>
+            <div className="library-actions">
+              <button className="browse-toggle full-width" onClick={toggleBrowse}>
+                {showBrowse ? 'Hide library' : `Browse ${formatNumber(stats?.indexed_papers ?? 0)} papers`}
+              </button>
+            </div>
+          </div>
 
           {showBrowse && (
             <div className="browse-panel">
@@ -246,21 +352,46 @@ function App() {
                 <p className="browse-loading">Loading papers...</p>
               ) : (
                 <>
-                  <div className="browse-grid">
+                  <div className="paper-list">
                     {papers.map((p, i) => (
-                      <div key={i} className="paper-card">
-                        <div className="paper-top">
-                          <span className="paper-year">{p.year || '—'}</span>
-                          {p.doi && <span className="paper-doi-badge">DOI</span>}
+                      <button key={i} className="paper-row" type="button" onClick={() => openPaperDetail(p)}>
+                        <div className="paper-row-main">
+                          <div className="paper-row-kickers">
+                            <span className="paper-kicker kind">{p.kind || 'paper'}</span>
+                            {p.has_summary && <span className="paper-kicker summary">summary ready</span>}
+                            <span className="paper-kicker year">{p.year || 'year unknown'}</span>
+                          </div>
+                          <h4>{p.title || p.display_title || p.citation || 'Untitled'}</h4>
+                          <p className="paper-citation">{p.citation || p.display_title || p.title || 'No citation available.'}</p>
+                          {(p.snippet || p.authors) && (
+                            <p className="paper-snippet">{p.snippet || p.authors}</p>
+                          )}
                         </div>
-                        <h4>{p.citation || p.display_title || p.title || 'Untitled'}</h4>
-                        <p className="paper-authors">{p.authors || ''}</p>
-                        {p.doi && (
-                          <a href={`https://doi.org/${p.doi}`} target="_blank" rel="noreferrer" className="paper-link">
-                            View DOI ↗
-                          </a>
-                        )}
-                      </div>
+                        <div className="paper-row-side">
+                          <div className="paper-side-block">
+                            <strong>Authors</strong>
+                            <span>{p.authors || 'Unknown authorship'}</span>
+                          </div>
+                          <div className="paper-side-block">
+                            <strong>Collection info</strong>
+                            <span>{p.chunk_count ? `${p.chunk_count} chunks` : p.has_summary ? 'Summary record' : 'Metadata record'}</span>
+                          </div>
+                          <div className="paper-links">
+                            <span className="paper-secondary-link">Open detail</span>
+                            {p.doi && (
+                              <a
+                                href={`https://doi.org/${p.doi}`}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="paper-link"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                DOI ↗
+                              </a>
+                            )}
+                          </div>
+                        </div>
+                      </button>
                     ))}
                   </div>
                   <div className="browse-nav">
@@ -276,7 +407,7 @@ function App() {
               )}
             </div>
           )}
-        </div>
+        </section>
       </main>
 
       {sourceDetail && (
@@ -327,7 +458,22 @@ function App() {
         </div>
       )}
 
-      {/* Footer */}
+      <div className="input-bar">
+        <form id="ask-form" className="input-form" onSubmit={handleAsk}>
+          <input
+            ref={inputRef}
+            type="text"
+            value={query}
+            onChange={e => setQuery(e.target.value)}
+            placeholder="Ask about geostatistics, mining, geology, remote sensing, or a specific paper..."
+            disabled={loading}
+          />
+          <button type="submit" disabled={loading || !query.trim()} className="send-btn">
+            {loading ? '...' : '→'}
+          </button>
+        </form>
+      </div>
+
       <footer className="footer">
         <span>Powered by <a href="https://orebit.id" target="_blank" rel="noreferrer">Orebit.id</a> · Open Source Mining Technology</span>
       </footer>
