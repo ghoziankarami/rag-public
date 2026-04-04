@@ -1,4 +1,5 @@
 :root {
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
   --bg: #f3f6fb;
   --bg-soft: #eaf0f8;
   --panel: rgba(255, 255, 255, 0.92);
@@ -43,7 +44,7 @@ body,
 
 body {
   margin: 0;
-  font-family: "Plus Jakarta Sans", Inter, "Segoe UI", sans-serif;
+  font-family: var(--font-sans);
   color: var(--text);
   background:
     radial-gradient(circle at top left, rgba(34, 84, 214, 0.12), transparent 26%),
@@ -116,8 +117,8 @@ a {
   border-radius: 999px;
   background: transparent;
   color: var(--muted);
-  font-size: 0.84rem;
-  font-weight: 700;
+  font-size: 0.95rem;
+  font-weight: 500;
 }
 
 .header-nav-link:hover {
@@ -164,9 +165,9 @@ a {
 
 .brand-name {
   margin: 0;
-  font-size: 1.08rem;
+  font-size: 1.25rem;
   font-weight: 800;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.02em;
 }
 
 .brand-sub {
@@ -185,8 +186,8 @@ a {
   border: 1px solid var(--border);
   background: rgba(255, 255, 255, 0.88);
   color: var(--muted);
-  font-size: 0.86rem;
-  font-weight: 700;
+  font-size: 1rem;
+  font-weight: 600;
 }
 
 .header-link:hover {
@@ -224,30 +225,31 @@ a {
   border-radius: 999px;
   background: rgba(34, 84, 214, 0.08);
   color: var(--accent);
-  font-size: 0.72rem;
-  font-weight: 800;
-  letter-spacing: 0.1em;
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0;
   text-transform: uppercase;
 }
 
 .section-title {
   margin: 0;
-  font-size: clamp(1.5rem, 2vw, 2rem);
-  line-height: 1.08;
-  letter-spacing: -0.04em;
+  font-size: 2.25rem;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
   color: var(--text);
 }
 
 .section-title-compact {
-  font-size: clamp(1.28rem, 1.8vw, 1.7rem);
+  font-size: clamp(1.9rem, 2.8vw, 2.25rem);
 }
 
 .section-description {
   margin: 0;
-  max-width: 64ch;
+  max-width: 600px;
   color: var(--muted);
-  font-size: 0.96rem;
-  line-height: 1.65;
+  font-size: 1.1rem;
+  line-height: 1.6;
 }
 
 .hero-shell {
@@ -293,11 +295,11 @@ a {
   min-height: 46px;
   padding: 0 16px;
   border: 1px solid var(--border);
-  border-radius: 999px;
+  border-radius: 8px;
   background: rgba(255, 255, 255, 0.88);
   color: var(--text);
-  font-size: 0.88rem;
-  font-weight: 800;
+  font-size: 1rem;
+  font-weight: 600;
 }
 
 .hero-action-primary {
@@ -318,25 +320,31 @@ a {
   border-radius: 999px;
   background: var(--accent-soft);
   color: var(--accent);
-  font-size: 0.72rem;
-  font-weight: 800;
-  letter-spacing: 0.12em;
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0;
   text-transform: uppercase;
 }
 
 .hero-copy h2 {
   margin: 0;
-  font-size: clamp(1.9rem, 3.8vw, 3.05rem);
-  line-height: 1.02;
-  letter-spacing: -0.05em;
-  max-width: 12ch;
+  font-size: clamp(3rem, 6vw, 4.5rem);
+  font-weight: 800;
+  line-height: 1.08;
+  letter-spacing: -0.04em;
+  max-width: 10ch;
+  background: linear-gradient(135deg, #000000 30%, #475569 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: #000000;
 }
 
 .hero-copy p {
   margin: 0;
-  max-width: 60ch;
+  max-width: 600px;
   color: var(--muted);
-  font-size: 1rem;
+  font-size: 1.25rem;
+  line-height: 1.6;
 }
 
 .suggestions {
@@ -347,13 +355,13 @@ a {
 }
 
 .suggestion-chip {
-  padding: 10px 14px;
+  padding: 0.75rem 1rem;
   border: 1px solid rgba(34, 84, 214, 0.14);
-  border-radius: 999px;
+  border-radius: 8px;
   background: rgba(255, 255, 255, 0.84);
   color: var(--accent-strong);
-  font-size: 0.84rem;
-  font-weight: 700;
+  font-size: 0.95rem;
+  font-weight: 500;
 }
 
 .suggestion-chip:hover {
@@ -383,25 +391,25 @@ a {
 .hero-stat-label {
   display: block;
   margin-bottom: 8px;
-  font-size: 0.72rem;
-  font-weight: 800;
-  letter-spacing: 0.1em;
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0;
   text-transform: uppercase;
   color: var(--muted-soft);
 }
 
 .hero-stat strong {
   display: block;
-  font-size: 1.35rem;
-  line-height: 1.05;
-  letter-spacing: -0.03em;
+  font-size: 1.5rem;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
 }
 
 .hero-stat small {
   display: block;
   margin-top: 8px;
   color: var(--muted);
-  font-size: 0.82rem;
+  font-size: 0.95rem;
 }
 
 .hero-note {
@@ -414,15 +422,18 @@ a {
 .hero-note h3,
 .context-card h3 {
   margin: 0 0 8px;
-  font-size: 1rem;
+  font-size: 1.25rem;
+  font-weight: 700;
   line-height: 1.2;
+  letter-spacing: -0.02em;
 }
 
 .hero-note p,
 .context-card p {
   margin: 0;
   color: var(--muted);
-  font-size: 0.92rem;
+  font-size: 1rem;
+  line-height: 1.6;
 }
 
 .context-grid {
@@ -443,9 +454,9 @@ a {
   border-radius: 999px;
   background: rgba(15, 23, 42, 0.06);
   color: var(--muted);
-  font-size: 0.72rem;
-  font-weight: 800;
-  letter-spacing: 0.08em;
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0;
   text-transform: uppercase;
 }
 
@@ -474,8 +485,8 @@ a {
   border-radius: 999px;
   background: rgba(34, 84, 214, 0.08);
   color: var(--accent);
-  font-size: 0.8rem;
-  font-weight: 800;
+  font-size: 0.875rem;
+  font-weight: 500;
 }
 
 .chat-area {
@@ -491,14 +502,18 @@ a {
 
 .welcome h2 {
   margin: 0;
-  font-size: 1.36rem;
-  letter-spacing: -0.03em;
+  font-size: 2.25rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
 }
 
 .welcome p {
   margin: 0;
   color: var(--muted);
-  max-width: 56ch;
+  max-width: 600px;
+  font-size: 1.1rem;
+  line-height: 1.6;
 }
 
 .message {
@@ -512,9 +527,9 @@ a {
 }
 
 .message-label {
-  font-size: 0.72rem;
-  font-weight: 800;
-  letter-spacing: 0.1em;
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0;
   text-transform: uppercase;
   color: var(--muted-soft);
 }
@@ -526,8 +541,8 @@ a {
 .message-content {
   padding: 16px 18px;
   border-radius: 22px;
-  font-size: 0.98rem;
-  line-height: 1.72;
+  font-size: 1rem;
+  line-height: 1.7;
   white-space: pre-wrap;
   word-break: break-word;
 }
@@ -593,8 +608,8 @@ a {
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.88);
   color: var(--muted);
-  font-size: 0.84rem;
-  font-weight: 700;
+  font-size: 0.95rem;
+  font-weight: 500;
 }
 
 .sources-list {
@@ -625,8 +640,8 @@ a {
 }
 
 .source-title {
-  font-size: 0.92rem;
-  font-weight: 700;
+  font-size: 1rem;
+  font-weight: 600;
   line-height: 1.45;
   color: var(--text);
 }
@@ -637,16 +652,16 @@ a {
   padding: 5px 10px;
   border-radius: 999px;
   color: #fff;
-  font-size: 0.72rem;
-  font-weight: 800;
+  font-size: 0.875rem;
+  font-weight: 600;
   white-space: nowrap;
 }
 
 .source-snippet {
   margin: 0 0 8px;
   color: var(--muted);
-  font-size: 0.88rem;
-  line-height: 1.65;
+  font-size: 1rem;
+  line-height: 1.6;
   display: -webkit-box;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
@@ -658,7 +673,7 @@ a {
   flex-wrap: wrap;
   gap: 12px;
   color: var(--muted-soft);
-  font-size: 0.78rem;
+  font-size: 0.95rem;
 }
 
 .source-meta a {
