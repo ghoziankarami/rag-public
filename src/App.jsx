@@ -224,7 +224,7 @@ function App() {
               <span className="eyebrow">Public research interface</span>
               <h2>Paper-backed answers for mining and geoscience work.</h2>
               <p>
-                Part of the Orebit public showcase, this interface lets you ask research questions, inspect cited evidence, and browse the indexed paper collection without exposing internal operator surfaces.
+                Ask research questions, inspect cited evidence, and browse the indexed paper collection in one public interface.
               </p>
               <div className="hero-actions">
                 <button type="button" className="hero-action hero-action-primary" onClick={() => focusComposer(SUGGESTIONS[0])}>
@@ -237,29 +237,12 @@ function App() {
                   Open showcase
                 </a>
               </div>
-              <div className="hero-points">
-                <div className="hero-point">
-                  <span className="hero-point-bullet" />
-                  <span><strong>Use chat</strong> for a quick synthesis across many papers.</span>
-                </div>
-                <div className="hero-point">
-                  <span className="hero-point-bullet" />
-                  <span><strong>Use the source list</strong> to verify which papers support each answer.</span>
-                </div>
-                <div className="hero-point">
-                  <span className="hero-point-bullet" />
-                  <span><strong>Use the library browser</strong> when you want direct corpus context, not just one answer.</span>
-                </div>
-              </div>
               <div className="suggestions">
                 {SUGGESTIONS.map((s, i) => (
                   <button key={i} className="suggestion-chip" onClick={() => handleSuggestion(s)}>
                     {s}
                   </button>
                 ))}
-              </div>
-              <div className="hero-caption">
-                Best for literature review, method comparison, and paper-backed technical answers.
               </div>
             </div>
           </article>
@@ -288,30 +271,12 @@ function App() {
               </div>
             </div>
             <div className="hero-note">
-              <h3>Why this belongs in the public showcase</h3>
+              <h3>Public and read-only</h3>
               <p>
-                Orebit RAG is a public-facing research surface: useful for showing grounded AI workflows without exposing internal ops, admin, or monitoring data.
+                Built for public research exploration without exposing internal ops, admin, or monitoring data.
               </p>
             </div>
           </aside>
-        </section>
-
-        <section className="showcase-strip">
-          <article className="showcase-item">
-            <span className="showcase-label">Public mode</span>
-            <strong>Read-only research interface</strong>
-            <p>No internal monitoring, admin control, or private operator data is exposed here.</p>
-          </article>
-          <article className="showcase-item">
-            <span className="showcase-label">Orebit family</span>
-            <strong>Part of orebit.id</strong>
-            <p>Designed to feel like a natural public product in the same Orebit showcase family.</p>
-          </article>
-          <article className="showcase-item">
-            <span className="showcase-label">Best use</span>
-            <strong>Ask, inspect, then browse</strong>
-            <p>Use answers for synthesis, sources for trust, and library view for broader corpus scanning.</p>
-          </article>
         </section>
 
         <section className="section-anchor" id="how-it-works">
@@ -319,7 +284,7 @@ function App() {
             <span className="section-kicker">How it works</span>
             <h2 className="section-title">A simple flow for grounded research.</h2>
             <p className="section-description">
-              Start with a question, inspect the sources, then browse the library when you need more context.
+              Ask, verify, then browse deeper when you need more context.
             </p>
           </div>
           <div className="context-grid">
