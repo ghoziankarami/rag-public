@@ -314,21 +314,61 @@ function App() {
           </article>
         </section>
 
-        <section className="context-grid" id="how-it-works">
-          {CONTEXT_CARDS.map((card) => (
-            <article key={card.label} className="context-card">
-              <span className="context-label">{card.label}</span>
-              <h3>{card.title}</h3>
-              <p>{card.body}</p>
-            </article>
-          ))}
+        <section className="ecosystem-panel section-anchor">
+          <div className="ecosystem-copy">
+            <span className="section-kicker">Orebit ecosystem</span>
+            <h2 className="section-title">One public family, different jobs.</h2>
+            <p className="section-description">
+              `orebit.id` is the main showcase. `rag.orebit.id` is the public research interface inside that family.
+            </p>
+            <p>
+              Use the showcase to understand the broader product story, then use RAG when you want grounded answers from papers.
+            </p>
+          </div>
+          <div className="ecosystem-grid">
+            <a href="https://orebit.id" target="_blank" rel="noreferrer" className="ecosystem-card">
+              <span className="ecosystem-kicker">Main site</span>
+              <strong>orebit.id</strong>
+              <p>Open the broader showcase, product positioning, and public project catalogue.</p>
+            </a>
+            <a href="https://orebit.id/#projects" target="_blank" rel="noreferrer" className="ecosystem-card">
+              <span className="ecosystem-kicker">Showcase section</span>
+              <strong>Projects</strong>
+              <p>Jump straight to the projects area where RAG should appear as a public research product.</p>
+            </a>
+            <a href="https://github.com/ghoziankarami/orebit-showcase" target="_blank" rel="noreferrer" className="ecosystem-card">
+              <span className="ecosystem-kicker">Source</span>
+              <strong>Orebit showcase repo</strong>
+              <p>See the public site source and the new navigation hooks that now point users into RAG.</p>
+            </a>
+          </div>
         </section>
 
-        <section className="chat-shell" id="research-chat">
+        <section className="section-anchor" id="how-it-works">
+          <div className="section-intro">
+            <span className="section-kicker">How it works</span>
+            <h2 className="section-title">A simple flow for grounded research.</h2>
+            <p className="section-description">
+              Start with a question, inspect the sources, then browse the library when you need more context.
+            </p>
+          </div>
+          <div className="context-grid">
+            {CONTEXT_CARDS.map((card) => (
+              <article key={card.label} className="context-card">
+                <span className="context-label">{card.label}</span>
+                <h3>{card.title}</h3>
+                <p>{card.body}</p>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section className="chat-shell section-anchor" id="research-chat">
           <div className="section-head">
             <div>
-              <h3>Research chat</h3>
-              <p>Ask a question first, then inspect the supporting evidence under each answer.</p>
+              <span className="section-kicker">Ask</span>
+              <h2 className="section-title section-title-compact">Research chat</h2>
+              <p className="section-description">Ask a question first, then inspect the supporting evidence under each answer.</p>
             </div>
             <span className="section-pill">Cited answers</span>
           </div>
@@ -401,11 +441,12 @@ function App() {
           </div>
         </section>
 
-        <section className="library-shell" id="paper-library">
+        <section className="library-shell section-anchor" id="paper-library">
           <div className="library-head">
             <div>
-              <h3>Paper library</h3>
-              <p>Browse the corpus directly in a clearer list view, then open a row to inspect summary and metadata.</p>
+              <span className="section-kicker">Library</span>
+              <h2 className="section-title section-title-compact">Paper library</h2>
+              <p className="section-description">Browse the corpus directly, then open a row to inspect summary and metadata.</p>
             </div>
             <div className="library-actions">
               <button className="browse-toggle full-width" onClick={toggleBrowse}>
