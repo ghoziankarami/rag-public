@@ -314,36 +314,6 @@ function App() {
           </article>
         </section>
 
-        <section className="ecosystem-panel section-anchor">
-          <div className="ecosystem-copy">
-            <span className="section-kicker">Orebit ecosystem</span>
-            <h2 className="section-title">One public family, different jobs.</h2>
-            <p className="section-description">
-              `orebit.id` is the main showcase. `rag.orebit.id` is the public research interface inside that family.
-            </p>
-            <p>
-              Use the showcase to understand the broader product story, then use RAG when you want grounded answers from papers.
-            </p>
-          </div>
-          <div className="ecosystem-grid">
-            <a href="https://orebit.id" target="_blank" rel="noreferrer" className="ecosystem-card">
-              <span className="ecosystem-kicker">Main site</span>
-              <strong>orebit.id</strong>
-              <p>Open the broader showcase, product positioning, and public project catalogue.</p>
-            </a>
-            <a href="https://orebit.id/#projects" target="_blank" rel="noreferrer" className="ecosystem-card">
-              <span className="ecosystem-kicker">Showcase section</span>
-              <strong>Projects</strong>
-              <p>Jump straight to the projects area where RAG should appear as a public research product.</p>
-            </a>
-            <a href="https://github.com/ghoziankarami/orebit-showcase" target="_blank" rel="noreferrer" className="ecosystem-card">
-              <span className="ecosystem-kicker">Source</span>
-              <strong>Orebit showcase repo</strong>
-              <p>See the public site source and the new navigation hooks that now point users into RAG.</p>
-            </a>
-          </div>
-        </section>
-
         <section className="section-anchor" id="how-it-works">
           <div className="section-intro">
             <span className="section-kicker">How it works</span>

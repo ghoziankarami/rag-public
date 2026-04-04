@@ -506,70 +506,6 @@ a {
   line-height: 1.6;
 }
 
-.ecosystem-panel {
-  display: grid;
-  gap: 18px;
-  padding: 24px 26px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-xl);
-  background:
-    radial-gradient(circle at top right, rgba(15, 118, 110, 0.08), transparent 22%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(246, 250, 255, 0.96) 100%);
-  box-shadow: var(--shadow-lg);
-}
-
-.ecosystem-copy {
-  display: grid;
-  gap: 8px;
-}
-
-.ecosystem-copy p {
-  margin: 0;
-  color: var(--muted);
-  max-width: 72ch;
-}
-
-.ecosystem-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 14px;
-}
-
-.ecosystem-card {
-  display: grid;
-  gap: 8px;
-  padding: 18px;
-  border: 1px solid rgba(15, 23, 42, 0.08);
-  border-radius: 22px;
-  background: rgba(255, 255, 255, 0.88);
-  box-shadow: var(--shadow-sm);
-}
-
-.ecosystem-card:hover {
-  border-color: var(--border-strong);
-  transform: translateY(-1px);
-}
-
-.ecosystem-kicker {
-  color: var(--muted-soft);
-  font-size: 0.72rem;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.ecosystem-card strong {
-  font-size: 1rem;
-  line-height: 1.2;
-}
-
-.ecosystem-card p {
-  margin: 0;
-  color: var(--muted);
-  font-size: 0.9rem;
-  line-height: 1.55;
-}
-
 .context-card {
   padding: 22px;
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 251, 255, 0.96) 100%);
@@ -1205,8 +1141,7 @@ a {
 @media (max-width: 980px) {
   .hero-shell,
   .context-grid,
-  .showcase-strip,
-  .ecosystem-grid {
+  .showcase-strip {
     grid-template-columns: 1fr;
   }
 
@@ -1253,8 +1188,7 @@ a {
   .chat-shell,
   .library-shell,
   .context-card,
-  .source-modal,
-  .ecosystem-panel {
+  .source-modal {
     padding: 18px;
     border-radius: 24px;
   }
