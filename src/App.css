@@ -766,7 +766,7 @@ a {
 .paper-row {
   width: 100%;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1.45fr) minmax(180px, 0.55fr);
   gap: 16px;
   text-align: left;
   padding: 18px;
@@ -821,15 +821,16 @@ a {
 
 .paper-row h4 {
   margin: 0;
-  font-size: 1rem;
-  line-height: 1.35;
+  font-size: 1.15rem;
+  line-height: 1.42;
   letter-spacing: -0.02em;
+  max-width: 30ch;
 }
 
 .paper-citation {
   margin: 0;
-  color: var(--text);
-  font-size: 0.9rem;
+  color: var(--muted);
+  font-size: 0.92rem;
   line-height: 1.55;
 }
 
@@ -845,7 +846,7 @@ a {
 }
 
 .paper-row-side {
-  min-width: 220px;
+  min-width: 180px;
   display: grid;
   gap: 10px;
   align-content: space-between;
@@ -869,6 +870,11 @@ a {
   color: var(--muted);
   font-size: 0.88rem;
   line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  max-width: 28ch;
 }
 
 .paper-links {

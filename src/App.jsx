@@ -49,12 +49,47 @@ function formatNumber(v) {
   return Number(v).toLocaleString('en-US')
 }
 
+function cleanDisplayText(text) {
+  if (!text) return ''
+  return String(text)
+    .replace(/<\/?jats:[^>]+>/gi, ' ')
+    .replace(/<\/?[^>]+>/g, ' ')
+    .replace(/\*\*/g, '')
+    .replace(/`/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+function compactAuthors(authors) {
+  const clean = cleanDisplayText(authors)
+  if (!clean) return 'Unknown authorship'
+  if (clean.length <= 84) return clean
+  const parts = clean
+    .split(/\s*(?:;|, & | & | and )\s*/)
+    .map(part => part.trim())
+    .filter(Boolean)
+  if (parts.length <= 1) return `${clean.slice(0, 80).trim()}…`
+  const visible = parts.slice(0, 3)
+  return `${visible.join(', ')}, et al.`
+}
+
+function paperMetaLine(paper) {
+  const authors = compactAuthors(paper.authors)
+  const year = cleanDisplayText(paper.year)
+  const journal = cleanDisplayText(paper.journal)
+  const parts = []
+  if (authors && authors !== 'Unknown authorship') parts.push(authors)
+  if (year) parts.push(year)
+  if (journal) parts.push(journal)
+  return parts.join(' · ') || 'Metadata record'
+}
+
 function normalizePaperDetail(record) {
   if (!record) return null
   return {
     ...record,
-    snippet: record.snippet || record.definition_snippet || 'No summary available.',
-    title: record.title || record.display_title || record.citation || 'Untitled paper',
+    snippet: cleanDisplayText(record.snippet || record.definition_snippet || 'No summary available.'),
+    title: cleanDisplayText(record.title || record.display_title || record.citation || 'Untitled paper'),
   }
 }
 
@@ -401,16 +436,16 @@ function App() {
                             {p.has_summary && <span className="paper-kicker summary">summary ready</span>}
                             <span className="paper-kicker year">{p.year || 'year unknown'}</span>
                           </div>
-                          <h4>{p.title || p.display_title || p.citation || 'Untitled'}</h4>
-                          <p className="paper-citation">{p.citation || p.display_title || p.title || 'No citation available.'}</p>
+                          <h4>{cleanDisplayText(p.title || p.display_title || p.citation || 'Untitled')}</h4>
+                          <p className="paper-citation">{paperMetaLine(p)}</p>
                           {(p.snippet || p.authors) && (
-                            <p className="paper-snippet">{p.snippet || p.authors}</p>
+                            <p className="paper-snippet">{cleanDisplayText(p.snippet || p.authors)}</p>
                           )}
                         </div>
                         <div className="paper-row-side">
                           <div className="paper-side-block">
                             <strong>Authors</strong>
-                            <span>{p.authors || 'Unknown authorship'}</span>
+                            <span title={cleanDisplayText(p.authors || 'Unknown authorship')}>{compactAuthors(p.authors)}</span>
                           </div>
                           <div className="paper-side-block">
                             <strong>Collection info</strong>
