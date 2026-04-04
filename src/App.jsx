@@ -375,7 +375,7 @@ function App() {
                                 </span>
                               )}
                             </div>
-                            {(src.definition_snippet || src.snippet) && <p className="source-snippet">{src.definition_snippet || src.snippet}</p>}
+                            {(src.definition_snippet || src.snippet) && <p className="source-snippet">{cleanDisplayText(src.definition_snippet || src.snippet)}</p>}
                             <div className="source-meta">
                               {src.year && <span>{src.year}</span>}
                               {src.authors && <span>{src.authors}</span>}
