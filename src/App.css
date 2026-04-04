@@ -203,9 +203,9 @@ a {
 .main {
   width: min(1180px, 100%);
   margin: 0 auto;
-  padding: 28px 20px 150px;
+  padding: 24px 20px 132px;
   display: grid;
-  gap: 20px;
+  gap: 16px;
 }
 
 .section-anchor {
@@ -215,7 +215,7 @@ a {
 .section-intro {
   display: grid;
   gap: 8px;
-  margin-bottom: 18px;
+  margin-bottom: 14px;
 }
 
 .section-kicker {
@@ -255,7 +255,7 @@ a {
 .hero-shell {
   display: grid;
   grid-template-columns: minmax(0, 1.28fr) minmax(290px, 0.92fr);
-  gap: 18px;
+  gap: 14px;
 }
 
 .hero-panel,
@@ -270,7 +270,7 @@ a {
 }
 
 .hero-panel {
-  padding: 28px;
+  padding: 30px;
   background:
     radial-gradient(circle at top right, rgba(34, 84, 214, 0.12), transparent 28%),
     linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(247, 250, 255, 0.96) 100%);
@@ -278,14 +278,14 @@ a {
 
 .hero-copy {
   display: grid;
-  gap: 14px;
+  gap: 12px;
 }
 
 .hero-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
-  margin-top: 4px;
+  margin-top: 2px;
 }
 
 .hero-action {
@@ -351,7 +351,7 @@ a {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
-  margin-top: 8px;
+  margin-top: 4px;
 }
 
 .suggestion-chip {
@@ -371,27 +371,28 @@ a {
 
 .hero-aside {
   display: grid;
-  gap: 14px;
+  gap: 10px;
   align-content: start;
 }
 
 .hero-stat-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
+  grid-template-columns: 1fr;
+  gap: 8px;
 }
 
 .hero-stat {
-  padding: 18px;
-  border-radius: 22px;
-  border: 1px solid rgba(148, 163, 184, 0.16);
-  background: rgba(255, 255, 255, 0.9);
+  padding: 14px 16px;
+  border-radius: 18px;
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: var(--shadow-sm);
 }
 
 .hero-stat-label {
   display: block;
-  margin-bottom: 8px;
-  font-size: 0.875rem;
+  margin-bottom: 4px;
+  font-size: 0.78rem;
   font-weight: 500;
   letter-spacing: 0;
   text-transform: uppercase;
@@ -400,21 +401,22 @@ a {
 
 .hero-stat strong {
   display: block;
-  font-size: 1.5rem;
-  line-height: 1.2;
+  font-size: 1.2rem;
+  line-height: 1.15;
   letter-spacing: -0.02em;
 }
 
 .hero-stat small {
   display: block;
-  margin-top: 8px;
+  margin-top: 4px;
   color: var(--muted);
-  font-size: 0.95rem;
+  font-size: 0.84rem;
+  line-height: 1.45;
 }
 
 .hero-note {
-  padding: 18px;
-  border-radius: 22px;
+  padding: 14px 16px;
+  border-radius: 18px;
   border: 1px solid rgba(15, 118, 110, 0.14);
   background: linear-gradient(180deg, rgba(240, 253, 250, 0.92) 0%, rgba(247, 255, 253, 0.96) 100%);
 }
@@ -439,30 +441,40 @@ a {
 .context-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
+  gap: 12px;
 }
 
 .context-card {
-  padding: 22px;
+  padding: 18px;
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 251, 255, 0.96) 100%);
 }
 
 .context-label {
   display: inline-flex;
-  margin-bottom: 10px;
-  padding: 7px 11px;
+  margin-bottom: 8px;
+  padding: 6px 10px;
   border-radius: 999px;
   background: rgba(15, 23, 42, 0.06);
   color: var(--muted);
-  font-size: 0.875rem;
+  font-size: 0.78rem;
   font-weight: 500;
   letter-spacing: 0;
   text-transform: uppercase;
 }
 
+.context-card h3 {
+  margin-bottom: 6px;
+  font-size: 1.1rem;
+}
+
+.context-card p {
+  font-size: 0.95rem;
+  line-height: 1.55;
+}
+
 .chat-shell,
 .library-shell {
-  padding: 22px;
+  padding: 20px;
 }
 
 .library-shell {
@@ -475,7 +487,7 @@ a {
   justify-content: space-between;
   align-items: flex-start;
   gap: 16px;
-  margin-bottom: 18px;
+  margin-bottom: 14px;
 }
 
 .section-pill {
@@ -495,9 +507,9 @@ a {
 }
 
 .welcome {
-  padding: 10px 4px 6px;
+  padding: 4px 2px 2px;
   display: grid;
-  gap: 8px;
+  gap: 6px;
 }
 
 .welcome h2 {

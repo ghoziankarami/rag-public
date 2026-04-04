@@ -15,18 +15,18 @@ const SUGGESTIONS = [
 const CONTEXT_CARDS = [
   {
     label: 'Step 1',
-    title: 'Ask a research question in plain language',
-    body: 'Start with the question you would normally ask a colleague: a method comparison, deposit process, or paper-backed explanation.',
+    title: 'Ask in plain language',
+    body: 'Start with the question you actually need answered.',
   },
   {
     label: 'Step 2',
-    title: 'Inspect the supporting sources before trusting the answer',
-    body: 'Each answer is backed by retrieved papers so you can open the evidence trail instead of relying on model memory alone.',
+    title: 'Check the cited sources',
+    body: 'Open the evidence trail before trusting the answer.',
   },
   {
     label: 'Step 3',
-    title: 'Browse the library when you want direct corpus context',
-    body: 'Open the paper browser for a fuller corpus view, then jump into paper detail when you need metadata and summary context.',
+    title: 'Browse for deeper context',
+    body: 'Use the library when you want the broader corpus view.',
   },
 ]
 
@@ -250,30 +250,25 @@ function App() {
           <aside className="hero-aside">
             <div className="hero-stat-grid">
               <div className="hero-stat">
-                <span className="hero-stat-label">Indexed papers</span>
+                <span className="hero-stat-label">Papers</span>
                 <strong>{formatNumber(paperCount)}</strong>
-                <small>Full-text research records available for retrieval.</small>
+                <small>Indexed and searchable.</small>
               </div>
               <div className="hero-stat">
-                <span className="hero-stat-label">Search chunks</span>
+                <span className="hero-stat-label">Chunks</span>
                 <strong>{formatNumber(chunkCount)}</strong>
-                <small>Vectorized chunks used to find relevant evidence.</small>
-              </div>
-              <div className="hero-stat">
-                <span className="hero-stat-label">Summaries</span>
-                <strong>{formatNumber(summaryCount)}</strong>
-                <small>Records that already include machine-readable summaries.</small>
+                <small>Used for retrieval.</small>
               </div>
               <div className="hero-stat">
                 <span className="hero-stat-label">Mode</span>
                 <strong>Read-only</strong>
-                <small>Public browsing and question answering without editing the corpus.</small>
+                <small>Public research surface.</small>
               </div>
             </div>
             <div className="hero-note">
               <h3>Public and read-only</h3>
               <p>
-                Built for public research exploration without exposing internal ops, admin, or monitoring data.
+                Research access only. No internal ops, admin, or monitoring data.
               </p>
             </div>
           </aside>
@@ -284,7 +279,7 @@ function App() {
             <span className="section-kicker">How it works</span>
             <h2 className="section-title">A simple flow for grounded research.</h2>
             <p className="section-description">
-              Ask, verify, then browse deeper when you need more context.
+              Ask, verify, then browse deeper.
             </p>
           </div>
           <div className="context-grid">
