@@ -272,24 +272,25 @@ function App() {
               </p>
             </div>
           </aside>
-        </section>
-
-        <section className="section-anchor" id="how-it-works">
-          <div className="section-intro">
-            <span className="section-kicker">How it works</span>
-            <h2 className="section-title">A simple flow for grounded research.</h2>
-            <p className="section-description">
-              Ask, verify, then browse deeper.
-            </p>
-          </div>
-          <div className="context-grid">
-            {CONTEXT_CARDS.map((card) => (
-              <article key={card.label} className="context-card">
-                <span className="context-label">{card.label}</span>
-                <h3>{card.title}</h3>
-                <p>{card.body}</p>
-              </article>
-            ))}
+          <div className="hero-flow section-anchor" id="how-it-works">
+            <div className="hero-flow-head">
+              <div className="section-intro section-intro-tight">
+                <span className="section-kicker">How it works</span>
+                <h2 className="section-title section-title-compact">Ask, verify, then browse deeper.</h2>
+              </div>
+              <p className="section-description hero-flow-description">
+                A simple flow for grounded research.
+              </p>
+            </div>
+            <div className="context-grid context-grid-compact">
+              {CONTEXT_CARDS.map((card) => (
+                <article key={card.label} className="context-card">
+                  <span className="context-label">{card.label}</span>
+                  <h3>{card.title}</h3>
+                  <p>{card.body}</p>
+                </article>
+              ))}
+            </div>
           </div>
         </section>
 
@@ -413,7 +414,15 @@ function App() {
                           </div>
                           <div className="paper-side-block">
                             <strong>Collection info</strong>
-                            <span>{p.chunk_count ? `${p.chunk_count} chunks` : p.has_summary ? 'Summary record' : 'Metadata record'}</span>
+                            <span>
+                              {p.chunk_count && !p.chunk_count_estimated
+                                ? `${p.chunk_count} chunks`
+                                : p.indexed_fulltext
+                                  ? 'Full-text indexed'
+                                  : p.has_summary
+                                    ? 'Summary record'
+                                    : 'Metadata record'}
+                            </span>
                           </div>
                           <div className="paper-links">
                             <span className="paper-secondary-link">Open detail</span>

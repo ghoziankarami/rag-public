@@ -218,6 +218,10 @@ a {
   margin-bottom: 14px;
 }
 
+.section-intro-tight {
+  margin-bottom: 0;
+}
+
 .section-kicker {
   display: inline-flex;
   width: fit-content;
@@ -381,6 +385,26 @@ a {
   align-content: start;
 }
 
+.hero-flow {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 14px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border);
+}
+
+.hero-flow-head {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.hero-flow-description {
+  max-width: 360px;
+  text-align: right;
+}
+
 .hero-stat-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -450,6 +474,10 @@ a {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 12px;
+}
+
+.context-grid-compact .context-card {
+  box-shadow: var(--shadow-sm);
 }
 
 .context-card {
@@ -1102,6 +1130,16 @@ a {
   .hero-shell,
   .context-grid {
     grid-template-columns: 1fr;
+  }
+
+  .hero-flow-head {
+    align-items: start;
+    flex-direction: column;
+  }
+
+  .hero-flow-description {
+    max-width: 100%;
+    text-align: left;
   }
 
   .paper-row {
