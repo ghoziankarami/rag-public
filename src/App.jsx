@@ -14,19 +14,19 @@ const SUGGESTIONS = [
 
 const CONTEXT_CARDS = [
   {
-    label: 'What is RAG?',
-    title: 'Retrieval-Augmented Generation keeps answers grounded',
-    body: 'Instead of answering from model memory alone, RAG first retrieves relevant papers and then composes an answer from those sources.',
+    label: 'Step 1',
+    title: 'Ask a research question in plain language',
+    body: 'Start with the question you would normally ask a colleague: a method comparison, deposit process, or paper-backed explanation.',
   },
   {
-    label: 'Why use it here?',
-    title: 'Better for literature-heavy mining and geoscience work',
-    body: 'This helps you compare methods, inspect evidence, and reduce hallucinated claims when the answer should come from papers, not guesses.',
+    label: 'Step 2',
+    title: 'Inspect the supporting sources before trusting the answer',
+    body: 'Each answer is backed by retrieved papers so you can open the evidence trail instead of relying on model memory alone.',
   },
   {
-    label: 'Best workflow',
-    title: 'Ask, inspect sources, then open the paper detail',
-    body: 'Use chat for synthesis, source cards for evidence, and the paper browser when you want to scan the collection directly.',
+    label: 'Step 3',
+    title: 'Browse the library when you want direct corpus context',
+    body: 'Open the paper browser for a fuller corpus view, then jump into paper detail when you need metadata and summary context.',
   },
 ]
 
@@ -85,6 +85,21 @@ function App() {
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages, loading])
+
+  function scrollToSection(id) {
+    if (typeof document === 'undefined') return
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+
+  function focusComposer(seed = '') {
+    if (seed) {
+      setQuery(seed)
+    }
+    setTimeout(() => {
+      inputRef.current?.focus()
+      scrollToSection('research-chat')
+    }, 40)
+  }
 
   async function fetchStats() {
     try {
@@ -150,6 +165,16 @@ function App() {
     if (next && !papers.length) loadBrowse(1)
   }
 
+  function openLibrary() {
+    if (!showBrowse) {
+      setShowBrowse(true)
+      if (!papers.length) loadBrowse(1)
+    }
+    setTimeout(() => {
+      scrollToSection('paper-library')
+    }, 40)
+  }
+
   function openPaperDetail(paper) {
     setSourceDetail(normalizePaperDetail(paper))
   }
@@ -165,15 +190,29 @@ function App() {
           <div className="brand">
             <div className="brand-mark">O</div>
             <div className="brand-copy">
-              <span className="brand-kicker">Orebit Research</span>
+              <span className="brand-kicker">Orebit Open Source Initiative</span>
               <h1 className="brand-name">Orebit RAG</h1>
               <p className="brand-sub">
                 {formatNumber(paperCount)} papers · {formatNumber(chunkCount)} chunks
               </p>
             </div>
           </div>
-          <a href="https://orebit.id" target="_blank" rel="noreferrer" className="header-link">
-            orebit.id ↗
+          <nav className="header-nav" aria-label="Public navigation">
+            <button type="button" className="header-nav-link" onClick={() => scrollToSection('how-it-works')}>
+              How it works
+            </button>
+            <button type="button" className="header-nav-link" onClick={() => scrollToSection('research-chat')}>
+              Ask
+            </button>
+            <button type="button" className="header-nav-link" onClick={openLibrary}>
+              Library
+            </button>
+            <a href="https://github.com/ghoziankarami/orebit-showcase" target="_blank" rel="noreferrer" className="header-nav-link">
+              GitHub
+            </a>
+          </nav>
+          <a href="https://orebit.id" target="_blank" rel="noreferrer" className="header-link header-link-primary">
+            Open orebit.id ↗
           </a>
         </div>
       </header>
@@ -182,23 +221,34 @@ function App() {
         <section className="hero-shell">
           <article className="hero-panel">
             <div className="hero-copy">
-              <span className="eyebrow">Grounded research assistant</span>
-              <h2>Ask, retrieve, and inspect paper-backed answers.</h2>
+              <span className="eyebrow">Public research interface</span>
+              <h2>Paper-backed answers for mining and geoscience work.</h2>
               <p>
-                RAG stands for Retrieval-Augmented Generation. This app first retrieves the most relevant papers from the Orebit collection, then builds an answer from those sources so you can inspect the evidence instead of trusting a generic model response.
+                Part of the Orebit public showcase, this interface lets you ask research questions, inspect cited evidence, and browse the indexed paper collection without exposing internal operator surfaces.
               </p>
+              <div className="hero-actions">
+                <button type="button" className="hero-action hero-action-primary" onClick={() => focusComposer(SUGGESTIONS[0])}>
+                  Ask a question
+                </button>
+                <button type="button" className="hero-action" onClick={openLibrary}>
+                  Browse library
+                </button>
+                <a href="https://orebit.id/#projects" target="_blank" rel="noreferrer" className="hero-action hero-action-link">
+                  Open showcase
+                </a>
+              </div>
               <div className="hero-points">
                 <div className="hero-point">
                   <span className="hero-point-bullet" />
-                  <span><strong>Use chat</strong> when you want a fast synthesis across many papers.</span>
+                  <span><strong>Use chat</strong> for a quick synthesis across many papers.</span>
                 </div>
                 <div className="hero-point">
                   <span className="hero-point-bullet" />
-                  <span><strong>Use the source list</strong> when you need to verify which papers support the answer.</span>
+                  <span><strong>Use the source list</strong> to verify which papers support each answer.</span>
                 </div>
                 <div className="hero-point">
                   <span className="hero-point-bullet" />
-                  <span><strong>Use the library browser</strong> when you want to explore the corpus directly, not through a single question.</span>
+                  <span><strong>Use the library browser</strong> when you want direct corpus context, not just one answer.</span>
                 </div>
               </div>
               <div className="suggestions">
@@ -238,15 +288,33 @@ function App() {
               </div>
             </div>
             <div className="hero-note">
-              <h3>Why not just use a normal chatbot?</h3>
+              <h3>Why this belongs in the public showcase</h3>
               <p>
-                For literature review, estimation methods, and technical comparison, grounded retrieval usually beats memory-only answers because you can trace claims back to actual papers.
+                Orebit RAG is a public-facing research surface: useful for showing grounded AI workflows without exposing internal ops, admin, or monitoring data.
               </p>
             </div>
           </aside>
         </section>
 
-        <section className="context-grid">
+        <section className="showcase-strip">
+          <article className="showcase-item">
+            <span className="showcase-label">Public mode</span>
+            <strong>Read-only research interface</strong>
+            <p>No internal monitoring, admin control, or private operator data is exposed here.</p>
+          </article>
+          <article className="showcase-item">
+            <span className="showcase-label">Orebit family</span>
+            <strong>Part of orebit.id</strong>
+            <p>Designed to feel like a natural public product in the same Orebit showcase family.</p>
+          </article>
+          <article className="showcase-item">
+            <span className="showcase-label">Best use</span>
+            <strong>Ask, inspect, then browse</strong>
+            <p>Use answers for synthesis, sources for trust, and library view for broader corpus scanning.</p>
+          </article>
+        </section>
+
+        <section className="context-grid" id="how-it-works">
           {CONTEXT_CARDS.map((card) => (
             <article key={card.label} className="context-card">
               <span className="context-label">{card.label}</span>
@@ -256,11 +324,11 @@ function App() {
           ))}
         </section>
 
-        <section className="chat-shell">
+        <section className="chat-shell" id="research-chat">
           <div className="section-head">
             <div>
               <h3>Research chat</h3>
-              <p>Ask a question, then inspect the supporting evidence below each answer.</p>
+              <p>Ask a question first, then inspect the supporting evidence under each answer.</p>
             </div>
             <span className="section-pill">Cited answers</span>
           </div>
@@ -333,11 +401,11 @@ function App() {
           </div>
         </section>
 
-        <section className="library-shell">
+        <section className="library-shell" id="paper-library">
           <div className="library-head">
             <div>
               <h3>Paper library</h3>
-              <p>Browse the corpus directly in a detailed list view. Open a row to inspect the summary and metadata.</p>
+              <p>Browse the corpus directly in a clearer list view, then open a row to inspect summary and metadata.</p>
             </div>
             <div className="library-actions">
               <button className="browse-toggle full-width" onClick={toggleBrowse}>
@@ -475,7 +543,7 @@ function App() {
       </div>
 
       <footer className="footer">
-        <span>Powered by <a href="https://orebit.id" target="_blank" rel="noreferrer">Orebit.id</a> · Open Source Mining Technology</span>
+        <span>Powered by <a href="https://orebit.id" target="_blank" rel="noreferrer">Orebit.id</a> · Public research surface in the Orebit showcase</span>
       </footer>
     </div>
   )
