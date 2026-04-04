@@ -238,7 +238,7 @@ function App() {
                 </a>
               </div>
               <div className="suggestions">
-                {SUGGESTIONS.map((s, i) => (
+                {SUGGESTIONS.slice(0, 3).map((s, i) => (
                   <button key={i} className="suggestion-chip" onClick={() => handleSuggestion(s)}>
                     {s}
                   </button>
