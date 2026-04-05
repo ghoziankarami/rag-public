@@ -89,6 +89,11 @@ function normalizePaperDetail(record) {
   return {
     ...record,
     snippet: cleanDisplayText(record.snippet || record.definition_snippet || 'No summary available.'),
+    obsidian_summary: cleanDisplayText(record.obsidian_summary || ''),
+    obsidian_note_path: cleanDisplayText(record.obsidian_note_path || ''),
+    obsidian_key_findings: Array.isArray(record.obsidian_key_findings)
+      ? record.obsidian_key_findings.map((item) => cleanDisplayText(item)).filter(Boolean)
+      : [],
     title: cleanDisplayText(record.title || record.display_title || record.citation || 'Untitled paper'),
   }
 }
@@ -98,7 +103,7 @@ function App() {
   const [messages, setMessages] = useState([])
   const [loading, setLoading] = useState(false)
   const [stats, setStats] = useState(null)
-  const [showBrowse, setShowBrowse] = useState(true)
+  const [showBrowse, setShowBrowse] = useState(false)
   const [papers, setPapers] = useState([])
   const [browsePage, setBrowsePage] = useState(1)
   const [browseLoading, setBrowseLoading] = useState(false)
@@ -184,7 +189,7 @@ function App() {
   async function loadBrowse(page = 1) {
     setBrowseLoading(true)
     try {
-      const res = await axios.get(`${API_BASE}/browse`, { params: { page, limit: 20 } })
+      const res = await axios.get(`${API_BASE}/browse`, { params: { page, limit: 10 } })
       setPapers(res.data?.papers || [])
       setBrowsePage(page)
     } catch (e) {
@@ -412,7 +417,7 @@ function App() {
             <div>
               <span className="section-kicker">Library</span>
               <h2 className="section-title section-title-compact">Paper library</h2>
-              <p className="section-description">Browse the corpus directly, then open a row to inspect summary and metadata.</p>
+              <p className="section-description">Browse the corpus in a compact list, then open a row only when you need the full summary and metadata.</p>
             </div>
             <div className="library-actions">
               <button className="browse-toggle full-width" onClick={toggleBrowse}>
@@ -427,6 +432,9 @@ function App() {
                 <p className="browse-loading">Loading papers...</p>
               ) : (
                 <>
+                  <div className="library-mode-note">
+                    Showing 10 papers at a time in compact browse mode.
+                  </div>
                   <div className="paper-list">
                     {papers.map((p, i) => (
                       <button key={i} className="paper-row" type="button" onClick={() => openPaperDetail(p)}>
@@ -438,9 +446,6 @@ function App() {
                           </div>
                           <h4>{cleanDisplayText(p.title || p.display_title || p.citation || 'Untitled')}</h4>
                           <p className="paper-citation">{paperMetaLine(p)}</p>
-                          {(p.snippet || p.authors) && (
-                            <p className="paper-snippet">{cleanDisplayText(p.snippet || p.authors)}</p>
-                          )}
                         </div>
                         <div className="paper-row-side">
                           <div className="paper-side-block">
@@ -448,7 +453,7 @@ function App() {
                             <span title={cleanDisplayText(p.authors || 'Unknown authorship')}>{compactAuthors(p.authors)}</span>
                           </div>
                           <div className="paper-side-block">
-                            <strong>Collection info</strong>
+                            <strong>Indexed as</strong>
                             <span>
                               {p.chunk_count && !p.chunk_count_estimated
                                 ? `${p.chunk_count} chunks`
@@ -460,7 +465,7 @@ function App() {
                             </span>
                           </div>
                           <div className="paper-links">
-                            <span className="paper-secondary-link">Open detail</span>
+                            <span className="paper-secondary-link">Inspect</span>
                             {p.doi && (
                               <a
                                 href={`https://doi.org/${p.doi}`}
@@ -510,13 +515,24 @@ function App() {
 
             <div className="source-modal-section">
               <div className="section-label">Summary</div>
-              <p>{sourceDetail.snippet || 'No summary available.'}</p>
+              <p>{sourceDetail.obsidian_summary || sourceDetail.snippet || 'No summary available.'}</p>
             </div>
+
+            {sourceDetail.obsidian_key_findings?.length > 0 && (
+              <div className="source-modal-section">
+                <div className="section-label">Key findings</div>
+                <ul className="source-findings-list">
+                  {sourceDetail.obsidian_key_findings.map((item, index) => (
+                    <li key={`${item}-${index}`}>{item}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
 
             {sourceDetail.definition_snippet && sourceDetail.definition_snippet !== sourceDetail.snippet && (
               <div className="source-modal-section">
                 <div className="section-label">Evidence used</div>
-                <p>{sourceDetail.definition_snippet}</p>
+                <p>{cleanDisplayText(sourceDetail.definition_snippet)}</p>
               </div>
             )}
 
@@ -527,6 +543,7 @@ function App() {
                 <div><strong>Authors</strong><span>{sourceDetail.authors || '—'}</span></div>
                 <div><strong>Year</strong><span>{sourceDetail.year || '—'}</span></div>
                 <div><strong>DOI</strong><span>{sourceDetail.doi || '—'}</span></div>
+                {sourceDetail.obsidian_note_path && <div><strong>Obsidian note</strong><span>{sourceDetail.obsidian_note_path}</span></div>}
               </div>
             </div>
 
@@ -534,6 +551,18 @@ function App() {
               <div className="source-modal-actions">
                 <a href={`https://doi.org/${sourceDetail.doi}`} target="_blank" rel="noreferrer" className="detail-link">
                   Open DOI ↗
+                </a>
+                {sourceDetail.obsidian_uri && (
+                  <a href={sourceDetail.obsidian_uri} className="detail-link detail-link-secondary">
+                    Open in Obsidian ↗
+                  </a>
+                )}
+              </div>
+            )}
+            {!sourceDetail.doi && sourceDetail.obsidian_uri && (
+              <div className="source-modal-actions">
+                <a href={sourceDetail.obsidian_uri} className="detail-link detail-link-secondary">
+                  Open in Obsidian ↗
                 </a>
               </div>
             )}
