@@ -49,6 +49,14 @@ function formatNumber(v) {
   return Number(v).toLocaleString('en-US')
 }
 
+function corpusTrustLabel(stats) {
+  if (!stats) return 'Loading'
+  if (stats.peer_reviewed_ok) return 'Healthy'
+  if ((stats.arxiv_violations ?? 0) > 0) return 'Needs cleanup'
+  if ((stats.parity_gap ?? 0) > 0) return 'Parity catch-up'
+  return 'Review'
+}
+
 function cleanDisplayText(text) {
   if (!text) return ''
   return String(text)
@@ -222,6 +230,7 @@ function App() {
   const paperCount = stats?.fulltext_papers ?? stats?.paper_count ?? 0
   const chunkCount = stats?.collection_count ?? stats?.indexed_chunks ?? 0
   const summaryCount = stats?.summary_count ?? 0
+  const corpusTrust = corpusTrustLabel(stats)
 
   return (
     <div className="app">
@@ -309,6 +318,12 @@ function App() {
               <h3>Public and read-only</h3>
               <p>
                 Research access only. No internal ops, admin, or monitoring data.
+              </p>
+            </div>
+            <div className="hero-note">
+              <h3>Corpus trust: {corpusTrust}</h3>
+              <p>
+                Peer-reviewed parity gap: {formatNumber(stats?.parity_gap ?? 0)} · arXiv policy violations: {formatNumber(stats?.arxiv_violations ?? 0)} · summaries: {formatNumber(summaryCount)}.
               </p>
             </div>
           </aside>
