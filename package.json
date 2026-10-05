@@ -16,5 +16,13 @@
   "devDependencies": {
     "vite": "^5.2.0",
     "@vitejs/plugin-react": "^4.2.0"
-  }
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ghoziankarami/rag-public.git"
+  },
+  "license": "MIT"
 }
