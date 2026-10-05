@@ -1,115 +1,78 @@
 # RAG Public Dashboard
 
-Vercel-backed public RAG search and browse dashboard for academic papers.
-This is the live UI source for `rag.orebit.id` after cutover; the legacy Streamlit showcase remains only as rollback reference.
+A React interface for searching, browsing, and asking questions about an
+academic-paper corpus. The interface calls a separate RAG API; the corpus and
+answer service are not included in this repository.
 
-## Deploy to Vercel
+[Hosted dashboard](https://rag.orebit.id) ·
+[API wrapper source](https://github.com/ghoziankarami/rag-api-wrapper)
 
-### Prerequisites
+## Requirements
 
-1. Install Vercel CLI:
-   ```bash
-   npm install -g vercel
-   ```
+- Node.js 22+ and npm.
+- A configured RAG API wrapper with an indexed corpus.
+- For hosted deployments, a server-side API proxy such as the included Vercel functions.
 
-2. Check the canonical secrets file first:
-   ```bash
-   test -f ~/.openclaw/secrets.env && grep '^VERCEL_TOKEN=' ~/.openclaw/secrets.env
-   ```
-   If the token is missing, then either add it to `~/.openclaw/secrets.env` or login once and sync it there.
+A frontend build alone does not provide paper search or answers.
 
-### Deployment Steps
+## Local development
 
-1. Navigate to project directory:
-   ```bash
-   cd /root/.openclaw/workspace/apps/rag-public
-   ```
-
-2. Deploy to Vercel:
-   ```bash
-   vercel
-   ```
-
-3. Follow prompts:
-   - Set up and deploy to Vercel
-   - Project name: `rag-public-dashboard`
-   - Link to existing project if exists
-
-4. Set environment variables:
-   - `RAG_API_BASE`: Public base URL for the RAG API wrapper (for example, `https://api.orebit.id/api/rag`)
-   - `RAG_API_KEY`: API key used by the Vercel serverless proxy to authenticate with the wrapper
-   - Add via Vercel dashboard or CLI: `vercel env add RAG_API_BASE` / `vercel env add RAG_API_KEY`
-
-5. Configure custom domain (if needed):
-   - Add `rag.orebit.id` in Vercel dashboard
-   - Update DNS: `rag` → `cname.vercel-dns.com`
-
-### API Connection
-
-The frontend calls the same-origin Vercel proxy at `/api/rag`. The proxy forwards to the public wrapper using server-side env values.
-
-- **API Base URL (client)**: `/api/rag` in production, `http://127.0.0.1:3004/api/rag` in local development
-- **Public wrapper host**: `api.orebit.id`
-- **Proxy env (server-side only)**: `RAG_API_BASE`, `RAG_API_KEY`
-- **Endpoints**:
-  - `GET /api/rag/stats` - Collection statistics
-  - `POST /api/rag/search` - Vector similarity search
-  - `GET /api/rag/browse` - Browse papers (paginated)
-  - `GET /api/rag/health` - Health check
-
-### Environment Variables
-
-Required:
-
-- `RAG_API_BASE` - public wrapper base URL used by the Vercel proxy
-- `RAG_API_KEY` - API key for the wrapper, used only server-side in the Vercel proxy
-
-### Local Development
+Start the [API wrapper](https://github.com/ghoziankarami/rag-api-wrapper) on
+`http://127.0.0.1:3004`, then run:
 
 ```bash
-npm install
+git clone https://github.com/ghoziankarami/rag-public.git
+cd rag-public
+npm ci
 npm run dev
 ```
 
-### Production Build
+Open `http://localhost:3002`. Localhost requests use
+`http://127.0.0.1:3004/api/rag`; deployed requests use the same-origin
+`/api/rag` proxy.
+
+## Build and deploy
 
 ```bash
 npm run build
 npm run preview
 ```
 
-## Architecture
+Build output is written to `dist/`. Vite preview serves static output; it does
+not run the Vercel API functions. A deployed application needs both the static
+frontend and the API proxy.
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│             Vercel CDN (live UI)                             │
-│        (rag.orebit.id served via Caddy proxy)                │
-└─────────────────────────────────────────────────────────────────┘
-                              │
-                              │ HTTPS + API Key
-                              ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                    VPS (orebit.id)                         │
-│  ┌──────────────────────────────────────────────────────┐   │
-│  │        RAG API Wrapper (Port 3004)               │   │
-│  │  - Search endpoint                                │   │
-│  │  - Browse endpoint                                │   │
-│  │  - Stats endpoint                                 │   │
-│  │  - Rate limiting (100 req/min)                    │   │
-│  └──────────────────────────────────────────────────────┘   │
-│                              │                             │
-│                              ▼                             │
-│  ┌──────────────────────────────────────────────────────┐   │
-│  │        Vector DB (local file)                     │   │
-│  └──────────────────────────────────────────────────────┘   │
-└─────────────────────────────────────────────────────────────────┘
-```
+Import the repository into Vercel and configure these **server-side** variables:
 
-## Notes
+| Variable | Purpose |
+| --- | --- |
+| `RAG_API_BASE` | Your wrapper URL, including `/api/rag`. |
+| `RAG_API_KEY` | The key accepted by the wrapper. |
 
-- Frontend is static (HTML + JS + CSS)
-- The Vercel serverless proxy handles authentication; the browser never sees the wrapper API key
-- API wrapper handles rate limiting and data access
-- Vector DB stays on VPS for security
-- Public access is read-only via API wrapper
-- The current live `rag.orebit.id` service is the Vercel-backed UI; the Streamlit showcase is rollback-only
+Do not prefix these keys with `VITE_`, put them in client code, or commit them.
+The proxy forwards the API key to the wrapper without exposing it to the browser.
+Configure your own domain through your hosting provider if needed.
+
+## Repository
+
+| Path | Contents |
+| --- | --- |
+| `src/` | React components and styles. |
+| `api/rag/`, `api/_lib/` | Server-side endpoint handlers and shared proxy. |
+| `vite.config.js` | Frontend development and build configuration. |
+| `package-lock.json` | Locked npm dependencies. |
+| `dist/`, `node_modules/` | Generated locally; do not commit. |
+
+## Limitations
+
+Search quality depends on corpus coverage and indexing. Generated answers can
+be incomplete or incorrect; inspect cited papers before relying on a claim.
+A retrieval score is a ranking signal, not a probability that an answer is correct.
+Corpus content is subject to its own rights and access restrictions.
+
+## Contributing and license
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) and [SECURITY.md](SECURITY.md).
+Original dashboard code is licensed under [MIT](LICENSE). Dependencies and paper
+content retain their own licences; the software licence does not grant rights
+to redistribute the corpus.
